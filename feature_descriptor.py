@@ -27,6 +27,7 @@ class FeatureDescriptor:
     ]
 
   def extract_features(self, img: Union[PIL.Image, np.array, torch.Tensor], descriptor: str):
+    if img.mode != 'RGB': raise ValueError(f'expected RGB image, but got {img.mode}')
     if descriptor == 'hog': return self.extract_hog_features(img)
     elif descriptor == 'color_moment': return self.extract_color_moments(img)
     elif descriptor == 'resnet_layer3': return self.extract_resnet_features(img)[0]
