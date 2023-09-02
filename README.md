@@ -16,6 +16,14 @@ Feature Descriptors:
   - [x] ResNet Layer 3
   - [x] ResNet FC
 
+Print (in human readable form):
+Options:
+1. Line Chart (X-> index, Y-> 0-1 values)
+2. Heatmap overlaid on image (in color moments that will be for each channel)
+3. For HOG, the usual should work
+4. For resnet layer3 & avgpool, should be able to just upscale and overlay mostly
+5. For FC, select top-k indices, have their class names as labels on X-axis, and feature-values/probabilities on Y-axis
+
 ---
 # References
 
