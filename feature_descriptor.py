@@ -59,10 +59,10 @@ class FeatureDescriptor:
     - compute signed magnitude weighted histogram of gradients with image split into 10x10 grid
     '''
     img = TF.resize(img, size=(100, 300))
-    img = TF.to_tensor(img).transpose(-1, -2).transpose(0, -1).numpy()
-    # TODO (rohan): search for a torchvision function to cvt to grayscale
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # values already are normalized between [0,1]
-    H, W = img.shape
+    img = TF.to_grayscale(img)
+    img = TF.to_tensor(img).transpose(-1, -2).transpose(0, -1)  # to_tensor scales values between [0, 1]
+
+    H, W = img.size()
     img_tensor = torch.tensor(img, dtype=torch.float).expand(1, 1, H, W)
 
     # calc grad_x and grad_y
@@ -97,7 +97,6 @@ class FeatureDescriptor:
   def extract_resnet_features(self, img):
     x = TF.resize(img, size=(224, 224))
     x = TF.to_tensor(x).unsqueeze(0)
-    x = x / 255  # rescale
     x = TF.normalize(x, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # mean and std taken from https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html
     self.net(x)
 
