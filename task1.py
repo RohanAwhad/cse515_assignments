@@ -36,9 +36,9 @@ fd_id = int(input('''Enter id of feature descriptor
 if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
 
 img = ds[img_id][0]
-features = fd.extract_features(ds[img_id][0], FEATURE_DESCRIPTOR_DICT[fd_id])
+features = fd.extract_features(img, FEATURE_DESCRIPTOR_DICT[fd_id])
 
-print(features, features.size())
+print(features)
 img.show()
 
 # TODO (rohan): visualize/print features
