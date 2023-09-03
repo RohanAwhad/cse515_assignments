@@ -103,8 +103,9 @@ class FeatureDescriptor:
     x = TF.normalize(x, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # mean and std taken from https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html
     self.net(x)
 
-    layer3_features = self.save_out[0]
-    avgpool_features = self.save_out[1]
-    fc_features = self.save_out[2]
+    layer3_features = self.save_out[0].squeeze()
+    layer3_features = layer3_features.view(len(layer3_features), -1).mean(-1).flatten()
+    avgpool_features = self.save_out[1].view(-1, 2).mean(-1).flatten()
+    fc_features = self.save_out[2].flatten()
     self.save_out.clear()
     return layer3_features, avgpool_features, fc_features
