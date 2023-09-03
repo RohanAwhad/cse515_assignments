@@ -61,10 +61,11 @@ class FeatureDescriptor:
     '''
     img = TF.resize(img, size=(100, 300))
     img = TF.to_grayscale(img)
-    img = TF.to_tensor(img).transpose(-1, -2).transpose(0, -1)  # to_tensor scales values between [0, 1]
+    img = TF.to_tensor(img).transpose(-1, -2).squeeze()#.transpose(0, -1)  # to_tensor scales values between [0, 1]
 
     H, W = img.size()
-    img_tensor = torch.tensor(img, dtype=torch.float).expand(1, 1, H, W)
+    #img_tensor = torch.tensor(img, dtype=torch.float).expand(1, 1, H, W)
+    img_tensor = img.expand(1, 1, H, W)
 
     # calc grad_x and grad_y
     # using torch functional package's unfold method to get the grids
@@ -91,9 +92,10 @@ class FeatureDescriptor:
       kernel_stride_size, stride=kernel_stride_size).squeeze().T
     grad_direct_bin_unfld = F.unfold(grad_direct_bin.expand(1, 1, H, W),
       kernel_stride_size, stride=kernel_stride_size).squeeze().T
-    return torch.stack([
-      (grad_mag_unfld * (grad_direct_bin == i)).sum(-1) for i in range(9)
-    ]).T.flatten()
+
+    return torch.cat([
+      (grad_mag_unfld * (grad_direct_bin_unfld == i)).sum(-1) for i in range(9)
+    ])
 
   def extract_resnet_features(self, img):
     x = TF.resize(img, size=(224, 224))
