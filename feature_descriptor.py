@@ -27,7 +27,7 @@ class FeatureDescriptor:
     ]
 
   def extract_features(self, img: Union[PIL.Image, np.array, torch.Tensor], descriptor: str):
-    if img.mode != 'RGB': raise ValueError(f'expected RGB image, but got {img.mode}')
+    if img.mode != 'RGB': return 2
     if descriptor == 'hog': return self.extract_hog_features(img)
     elif descriptor == 'color_moment': return self.extract_color_moments(img)
     elif descriptor == 'resnet_layer3': return self.extract_resnet_features(img)[0]
@@ -98,6 +98,7 @@ class FeatureDescriptor:
     ])
 
   def extract_resnet_features(self, img):
+    if img.mode != 'RGB': return 2  # this is hacky.
     x = TF.resize(img, size=(224, 224))
     x = TF.to_tensor(x).unsqueeze(0)
     x = TF.normalize(x, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # mean and std taken from https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html
