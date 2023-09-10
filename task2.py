@@ -9,10 +9,12 @@ from tqdm import tqdm
 
 from feature_descriptor import FeatureDescriptor
 
-# Custom variables
+# TODO (rohan): move this to config
+# env setup 
 torch.set_grad_enabled(False)
 torch.hub.set_dir('/Users/rohan/3_Resources/ai_models/torch_hub')
 
+# TODO (rohan): move this to helper
 def save_data(data_tuple, fd):
   binary_file = pickle.dumps(data_tuple)
   compressed_bin_file = bz2.compress(binary_file)
@@ -22,11 +24,14 @@ def save_data(data_tuple, fd):
   with open(f'features/{fd}.bin', 'wb') as f: f.write(compressed_bin_file)
 
 
+# TODO (rohan): move this to config
+# TODO (rohan): soft link "./data/caltech101" to the SSD
 ds = torchvision.datasets.Caltech101('/Users/rohan/3_Resources/ai_datasets/caltech_101', download=False)
 feature_descriptor = FeatureDescriptor(
   net=torchvision.models.resnet50(weights="ResNet50_Weights.DEFAULT").eval()
 )
 
+# TODO (rohan): instead of saving each FD as a single file, can save just one. But that would require changing task3.py
 for fd in ('color_moment', 'hog'):
   embd_idx_to_img_id = dict()
   features_list = []
@@ -48,6 +53,7 @@ for img_id, (img, _) in tqdm(enumerate(ds), total=len(ds), desc='ResNet feats'):
   l3_list.append(l3)
   ap_list.append(ap)
   fc_list.append(fc)
+  embd_idx_to_img_id[len(l3_list)] = img_id
 
 save_data((embd_idx_to_img_id, torch.stack(l3_list).numpy()), 'resnet_layer3')
 save_data((embd_idx_to_img_id, torch.stack(ap_list).numpy()), 'resnet_avgpool')
