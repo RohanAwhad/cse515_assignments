@@ -27,7 +27,6 @@ class FeatureDescriptor:
     ]
 
   def extract_features(self, img: Union[PIL.Image, np.array, torch.Tensor], descriptor: str):
-    if img.mode != 'RGB': return 2
     if descriptor == 'hog': return self.extract_hog_features(img)
     elif descriptor == 'color_moment': return self.extract_color_moments(img)
     elif descriptor == 'resnet_layer3': return self.extract_resnet_features(img)[0]
@@ -37,6 +36,7 @@ class FeatureDescriptor:
 
 
   def extract_color_moments(self, img):
+    if img.mode != 'RGB': raise ValueError(f'expected "RGB" image. got {img.mode}')
     img = TF.resize(img, size=(100, 300))
     img = TF.to_tensor(img).unsqueeze(0)
 
@@ -44,10 +44,18 @@ class FeatureDescriptor:
     kernel_size = (H//10, W//10)
     img = F.unfold(img, kernel_size, stride=kernel_size).squeeze().view(3, 300, 100)
 
-    mean_mmt = img.mean(-2).flatten()
-    std_mmt = img.std(-2).flatten()
-    skew_mmt = torch.tensor(stats.skew(img.numpy(), axis=-2, keepdims=True)).flatten()
-    return torch.cat((mean_mmt, std_mmt, skew_mmt), axis=0)
+    mean_mmt = img.mean(-2)
+    std_mmt = img.std(-2)
+    # TODO (rohan): verify is formula matching
+    #skew_mmt = torch.tensor(stats.skew(img.numpy(), axis=-2, keepdims=True)).flatten()
+    # calculating skew
+    n_pixels = img.size()[1]
+    skew_mmt = img - mean_mmt.unsqueeze(1)
+    skew_mmt = (skew_mmt ** 3).sum(1) / n_pixels
+    skew_mmt = skew_mmt.abs().pow(1/3) * (skew_mmt/skew_mmt.abs())
+    skew_mmt[skew_mmt.isnan()] = 0
+
+    return torch.cat((mean_mmt.flatten(), std_mmt.flatten(), skew_mmt.flatten()), axis=0)
 
 
   def extract_hog_features(self, img):
@@ -98,10 +106,10 @@ class FeatureDescriptor:
     ])
 
   def extract_resnet_features(self, img):
-    if img.mode != 'RGB': return 2  # this is hacky.
+    if img.mode != 'RGB': raise ValueError(f'expected "RGB" image. got {img.mode}')
     x = TF.resize(img, size=(224, 224))
     x = TF.to_tensor(x).unsqueeze(0)
-    x = TF.normalize(x, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # mean and std taken from https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html
+    #x = TF.normalize(x, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # mean and std taken from https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html
     self.net(x)
 
     layer3_features = self.save_out[0].squeeze()
