@@ -32,12 +32,14 @@ RESNET_AVGPOOL_IDX, RESNET_AVGPOOL_FEATS = helper.load_data('resnet_avgpool')
 RESNET_LAYER3_IDX, RESNET_LAYER3_FEATS = helper.load_data('resnet_layer3')
 RESNET_FC_IDX, RESNET_FC_FEATS = helper.load_data('resnet_fc')
 
+HOG_FEATS = torch.tensor(HOG_FEATS)
+
 def retrieve(img_id):
   img = ds[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
 
   color_mmt = feature_descriptor.extract_color_moments(img).numpy()
-  hog = feature_descriptor.extract_hog_features(img).numpy()
+  hog = feature_descriptor.extract_hog_features(img)
   resnet_layer3, resnet_avgpool, resnet_fc = tuple(map(lambda x: x.numpy(), feature_descriptor.extract_resnet_features(img)))
 
   top_k_imgs = []
@@ -49,8 +51,12 @@ def retrieve(img_id):
   top_k_imgs.append(color_mmt_top_k_imgs)
   top_k_ids.append([COLOR_MMT_IDX[x] for x in color_mmt_top_k_img_ids])
 
-  hog_similarity = np.square(hog[np.newaxis, :] - HOG_FEATS).sum(-1) ** 0.5  # manhattan distance
-  hog_top_k_img_ids = hog_similarity.argsort()[:K]
+  #hog_similarity = np.square(hog[np.newaxis, :] - HOG_FEATS).sum(-1) ** 0.5  # manhattan distance
+  # intersection similarity
+  hog = hog.unsqueeze(0).expand(len(HOG_FEATS), -1)
+  hog_stack = torch.stack([hog, HOG_FEATS])
+  hog_similarity = hog_stack.min(0).values.sum(-1) / hog_stack.max(0).values.sum(-1)
+  hog_top_k_img_ids = hog_similarity.numpy().argsort()[-K:][::-1]
   hog_top_k_imgs = [ds[HOG_IDX[x]][0] for x in hog_top_k_img_ids]
   top_k_imgs.append(hog_top_k_imgs)
   top_k_ids.append([HOG_IDX[x] for x in color_mmt_top_k_img_ids])

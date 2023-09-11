@@ -32,7 +32,7 @@ Options:
 
 - [x] Decide which similarity measure to use for each feature descriptor
   - [x] Color Moment -> Euclidean Distance
-  - [ ] HoG -> Intersection Similarity
+  - [x] HoG -> Intersection Similarity
   - [x] ResNet Layer 3 -> Euclidean Distance
   - [x] ResNet AvgPool -> Euclidean Distance
   - [x] ResNet FC -> Manhattan Distance
