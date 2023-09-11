@@ -1,5 +1,6 @@
 #!/opt/homebrew/bin/python3
 
+import json
 import torch
 import torchvision
 
@@ -36,9 +37,10 @@ fd_id = int(input('''Enter id of feature descriptor
 if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
 
 img = ds[img_id][0]
+if img.mode == 'L': img = img.convert('RGB')
 features = fd.extract_features(img, FEATURE_DESCRIPTOR_DICT[fd_id])
 
-print(features)
+print(json.dumps(features.tolist(), indent=2))
 img.show()
 
 # TODO (rohan): visualize/print features
