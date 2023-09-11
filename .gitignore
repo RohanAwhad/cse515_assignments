@@ -2,3 +2,5 @@ __pycache__
 *.swp
 features
 .DS_Store
+scrap
+HARD_SAMPLES.txt
