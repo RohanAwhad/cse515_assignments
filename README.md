@@ -34,7 +34,7 @@ Options:
   - [x] Color Moment -> Pearson Correlation Coefficient
   - [x] HoG -> Intersection Similarity
   - [x] ResNet Layer 3 -> Cosine Similarity
-  - [x] ResNet AvgPool -> Euclidean Distance
+  - [x] ResNet AvgPool -> Cosine Similarity
   - [x] ResNet FC -> Manhattan Distance
 
 - [x] Implement similarity measures

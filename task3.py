@@ -63,7 +63,7 @@ def retrieve(img_id):
   top_k_imgs.append(hog_top_k_imgs)
   top_k_ids.append([HOG_IDX[x] for x in color_mmt_top_k_img_ids])
 
-  resnet_avgpool_similarity = (resnet_avgpool @ RESNET_AVGPOOL_FEATS.T) / (norm(resnet_avgpool) * norm(RESNET_AVGPOOL_FEATS.T, axis=0))
+  resnet_avgpool_similarity = (resnet_avgpool @ RESNET_AVGPOOL_FEATS.T) / (norm(resnet_avgpool) * norm(RESNET_AVGPOOL_FEATS.T, axis=0))  # cosine similarity
   resnet_avgpool_top_k_img_ids = resnet_avgpool_similarity.argsort()[-K:][::-1]
   resnet_avgpool_top_k_imgs = [ds[RESNET_AVGPOOL_IDX[x]][0] for x in resnet_avgpool_top_k_img_ids]
   top_k_imgs.append(resnet_avgpool_top_k_imgs)
