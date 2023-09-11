@@ -24,6 +24,23 @@ Options:
 4. For resnet layer3 & avgpool, should be able to just upscale and overlay mostly
 5. For FC, select top-k indices, have their class names as labels on X-axis, and feature-values/probabilities on Y-axis
 
+# Task 2
+
+- [x] Extract features from all images and store in database
+
+# Task 3
+
+- [x] Decide which similarity measure to use for each feature descriptor
+  - [x] Color Moment -> Euclidean Distance
+  - [ ] HoG -> Intersection Similarity
+  - [x] ResNet Layer 3 -> Euclidean Distance
+  - [x] ResNet AvgPool -> Euclidean Distance
+  - [x] ResNet FC -> Manhattan Distance
+
+- [x] Implement similarity measures
+- [x] Implement query mechanism
+- [x] Implement retrieval mechanism
+- [x] Implement display mechanism
 ---
 # References
 
