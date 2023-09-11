@@ -31,9 +31,9 @@ Options:
 # Task 3
 
 - [x] Decide which similarity measure to use for each feature descriptor
-  - [x] Color Moment -> Euclidean Distance
+  - [x] Color Moment -> Pearson Correlation Coefficient
   - [x] HoG -> Intersection Similarity
-  - [x] ResNet Layer 3 -> Euclidean Distance
+  - [x] ResNet Layer 3 -> Cosine Similarity
   - [x] ResNet AvgPool -> Euclidean Distance
   - [x] ResNet FC -> Manhattan Distance
 
