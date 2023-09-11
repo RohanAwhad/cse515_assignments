@@ -12,6 +12,8 @@ import pickle
 import torch
 import torchvision
 
+from numpy.linalg import norm
+
 # env setup
 torch.set_grad_enabled(False)
 torch.hub.set_dir('/Users/rohan/3_Resources/ai_models/torch_hub')
@@ -38,20 +40,20 @@ def retrieve(img_id):
   img = ds[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
 
-  color_mmt = feature_descriptor.extract_color_moments(img).numpy()
+  color_mmt = feature_descriptor.extract_color_moments(img)#.numpy()
   hog = feature_descriptor.extract_hog_features(img)
   resnet_layer3, resnet_avgpool, resnet_fc = tuple(map(lambda x: x.numpy(), feature_descriptor.extract_resnet_features(img)))
 
   top_k_imgs = []
   top_k_ids = []
 
-  color_mmt_similarity = np.square(color_mmt[np.newaxis, :] - COLOR_MMT_FEATS).sum(-1) ** 0.5
-  color_mmt_top_k_img_ids = color_mmt_similarity.argsort()[:K]
+  color_mmt_similarity = torch.cat((color_mmt.unsqueeze(0), 
+    torch.tensor(COLOR_MMT_FEATS)), dim=0).corrcoef()[0, 1:]  # pearson correlation coefficient
+  color_mmt_top_k_img_ids = color_mmt_similarity.numpy().argsort()[-K:][::-1]
   color_mmt_top_k_imgs = [ds[COLOR_MMT_IDX[x]][0] for x in color_mmt_top_k_img_ids]
   top_k_imgs.append(color_mmt_top_k_imgs)
   top_k_ids.append([COLOR_MMT_IDX[x] for x in color_mmt_top_k_img_ids])
 
-  #hog_similarity = np.square(hog[np.newaxis, :] - HOG_FEATS).sum(-1) ** 0.5  # manhattan distance
   # intersection similarity
   hog = hog.unsqueeze(0).expand(len(HOG_FEATS), -1)
   hog_stack = torch.stack([hog, HOG_FEATS])
@@ -61,15 +63,14 @@ def retrieve(img_id):
   top_k_imgs.append(hog_top_k_imgs)
   top_k_ids.append([HOG_IDX[x] for x in color_mmt_top_k_img_ids])
 
-  resnet_avgpool_similarity = np.square(resnet_avgpool[np.newaxis, :] - RESNET_AVGPOOL_FEATS).sum(-1) ** 0.5  # euclidean distance
-  resnet_avgpool_top_k_img_ids = resnet_avgpool_similarity.argsort()[:K]
+  resnet_avgpool_similarity = (resnet_avgpool @ RESNET_AVGPOOL_FEATS.T) / (norm(resnet_avgpool) * norm(RESNET_AVGPOOL_FEATS.T, axis=0))
+  resnet_avgpool_top_k_img_ids = resnet_avgpool_similarity.argsort()[-K:][::-1]
   resnet_avgpool_top_k_imgs = [ds[RESNET_AVGPOOL_IDX[x]][0] for x in resnet_avgpool_top_k_img_ids]
   top_k_imgs.append(resnet_avgpool_top_k_imgs)
   top_k_ids.append([RESNET_AVGPOOL_IDX[x] for x in color_mmt_top_k_img_ids])
 
-  #resnet_layer3_similarity = resnet_layer3 @ RESNET_LAYER3_FEATS.T  # dot_product
-  resnet_layer3_similarity = np.square(resnet_layer3[np.newaxis, :] - RESNET_LAYER3_FEATS).sum(-1) ** 0.5  # euclidean distance
-  resnet_layer3_top_k_img_ids = resnet_layer3_similarity.argsort()[:K]
+  resnet_layer3_similarity = (resnet_layer3 @ RESNET_LAYER3_FEATS.T) / (norm(resnet_layer3) * norm(RESNET_LAYER3_FEATS.T, axis=0))  # cosine similarity
+  resnet_layer3_top_k_img_ids = resnet_layer3_similarity.argsort()[-K:][::-1]
   resnet_layer3_top_k_imgs = [ds[RESNET_LAYER3_IDX[x]][0] for x in resnet_layer3_top_k_img_ids]
   top_k_imgs.append(resnet_layer3_top_k_imgs)
   top_k_ids.append([RESNET_LAYER3_IDX[x] for x in color_mmt_top_k_img_ids])
