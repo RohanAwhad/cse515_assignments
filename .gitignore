@@ -4,3 +4,5 @@ features
 .DS_Store
 scrap
 HARD_SAMPLES.txt
+data
+models
