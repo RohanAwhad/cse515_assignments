@@ -46,8 +46,7 @@ class FeatureDescriptor:
 
     mean_mmt = img.mean(-2)
     std_mmt = img.std(-2)
-    # TODO (rohan): verify is formula matching
-    #skew_mmt = torch.tensor(stats.skew(img.numpy(), axis=-2, keepdims=True)).flatten()
+
     # calculating skew
     n_pixels = img.size()[1]
     skew_mmt = img - mean_mmt.unsqueeze(1)
