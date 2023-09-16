@@ -2,6 +2,28 @@ import matplotlib.pyplot as plt
 import pickle
 import bz2
 
+def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_label, similarity_function):
+  n_rows = 2
+  fig, axes = plt.subplots(n_rows, K, figsize=(K*2, n_rows*2))
+  axes[0, 0].imshow(img)
+  axes[0, 0].set_xlabel(f'Img ID: {query_img_id}')
+  axes[0, 0].set_xticks([])
+  axes[0, 0].set_yticks([])
+  for i in range(1, K): axes[0, i].axis('off')
+
+  for i, (img, idx, score) in enumerate(zip(top_k_imgs, top_k_ids, top_k_img_scores)):
+    ax = axes[1, i]
+    ax.set_xlabel(f'Img ID: {idx}\nScore/Distance: {score:0.2f}')
+    if img.mode == 'L': img = img.convert('RGB')
+    ax.imshow(img)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+  axes[1, 0].set_ylabel(similarity_function)
+  fig.suptitle(row_label)
+  plt.tight_layout()
+  plt.show()
+
 def save_top_k(img, query_img_id, top_k_imgs, top_k_ids, K, fn):
   n_rows = len(top_k_imgs)+1
   fig, axes = plt.subplots(n_rows, K, figsize=(K*2, n_rows*2))
