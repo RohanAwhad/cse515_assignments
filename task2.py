@@ -1,35 +1,23 @@
 #!/opt/homebrew/bin/python3
 
+import config
 import helper
 
 from feature_descriptor import FeatureDescriptor
 
 # 3rd-party libs
 import torch
-import torchvision
 
 from tqdm import tqdm
 
-# TODO (rohan): move this to config
-# env setup 
-torch.set_grad_enabled(False)
-torch.hub.set_dir('/Users/rohan/3_Resources/ai_models/torch_hub')
 
-# TODO (rohan): move this to helper
-
-
-# TODO (rohan): move this to config
-# TODO (rohan): soft link "./data/caltech101" to the SSD
-ds = torchvision.datasets.Caltech101('/Users/rohan/3_Resources/ai_datasets/caltech_101', download=False)
-feature_descriptor = FeatureDescriptor(
-  net=torchvision.models.resnet50(weights="ResNet50_Weights.DEFAULT").eval()
-)
+feature_descriptor = FeatureDescriptor(config.RESNET_MODEL)
 
 # TODO (rohan): instead of saving each FD as a single file, can save just one. But that would require changing task3.py
 for fd in ('color_moment', 'hog'):
   embd_idx_to_img_id = dict()
   features_list = []
-  for img_id, (img, _) in tqdm(enumerate(ds), total=len(ds), desc=f'{fd} feats'):
+  for img_id, (img, _) in tqdm(enumerate(config.DATASET), total=len(config.DATASET), desc=f'{fd} feats'):
     if img.mode == 'L': img = img.convert('RGB')
     feats = feature_descriptor.extract_features(img, fd)
     if not isinstance(feats, torch.Tensor): continue
@@ -41,7 +29,7 @@ for fd in ('color_moment', 'hog'):
 
 embd_idx_to_img_id = dict()
 l3_list, ap_list, fc_list = [], [], []
-for img_id, (img, _) in tqdm(enumerate(ds), total=len(ds), desc='ResNet feats'):
+for img_id, (img, _) in tqdm(enumerate(config.DATASET), total=len(config.DATASET), desc='ResNet feats'):
   if img.mode == 'L': img = img.convert('RGB')
   tmp = feature_descriptor.extract_resnet_features(img)
   if tmp == 2: continue
