@@ -34,7 +34,7 @@ for img_id, (img, _) in tqdm(enumerate(config.DATASET), total=len(config.DATASET
   if img.mode == 'L': img = img.convert('RGB')
   tmp = feature_descriptor.extract_resnet_features(img)
   if tmp == 2: continue
-  embd_idx_to_img_id[len(features_list)] = (img_id, label)
+  embd_idx_to_img_id[len(l3_list)] = (img_id, label)
   l3, ap, fc = tmp
   l3_list.append(l3)
   ap_list.append(ap)
