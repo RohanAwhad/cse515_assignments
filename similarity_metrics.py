@@ -1,3 +1,7 @@
+'''
+Changes made since Phase 1 submission
+- created this new file and moved similarity calc funcs here
+'''
 import numpy as np
 import torch
 

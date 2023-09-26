@@ -1,3 +1,7 @@
+'''
+Changes since Phase 1 Submission:
+- added a plot function to show task0a results during runtime
+'''
 import matplotlib.pyplot as plt
 import pickle
 import bz2

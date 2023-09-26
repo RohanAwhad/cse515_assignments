@@ -1,4 +1,10 @@
 #!/opt/homebrew/bin/python3
+'''
+Changes made since Phase 1 submission
+- moved config vars to config file
+- renamed task2 to task0a for phase 2
+- added storage of labels for phase 2
+'''
 
 import config
 import helper

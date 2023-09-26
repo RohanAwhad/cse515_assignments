@@ -1,3 +1,8 @@
+'''
+Changes since Phase 1 submission:
+- created this new file and moved global config vars here
+'''
+
 import torch
 import torchvision
 
