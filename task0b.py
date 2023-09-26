@@ -15,7 +15,6 @@ import torchvision
 
 from numpy.linalg import norm
 
-K = int(input('Input K for top-k: '))
 
 feature_descriptor = FeatureDescriptor(net=config.RESNET_MODEL)
 
@@ -112,43 +111,15 @@ def retrieve(img_id, feature_desc):
   img = config.DATASET[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
 
-  '''
-  color_mmt = feature_descriptor.extract_color_moments(img)#.numpy()
-  hog = feature_descriptor.extract_hog_features(img)
-  resnet_layer3, resnet_avgpool, resnet_fc = tuple(map(lambda x: x.numpy(), feature_descriptor.extract_resnet_features(img)))
-  '''
-
-  #top_k_ids, top_k_scores = retriever.retrieve_using_resnet_avgpool(resnet_avgpool)
-  top_k_ids, top_k_scores = FEAT_DESC_TO_RETRIEVAL_FUNC[feature_desc](feature_descriptor.extract_features(img, feature_desc))
+  retriever = FEAT_DESC_TO_RETRIEVAL_FUNC[feature_desc]
+  feats = feature_descriptor.extract_features(img, feature_desc)
+  top_k_ids, top_k_scores = retriever(feats)
   top_k_imgs = [config.DATASET[x][0] for x in top_k_ids]
   helper.plot(img, img_id, top_k_imgs, top_k_ids, top_k_scores, K, feature_desc, FEAT_DESC_TO_SIMILARITY_METRIC[feature_desc])
 
-  '''
-
-  # intersection similarity
-
-  resnet_avgpool_similarity = (resnet_avgpool @ RESNET_AVGPOOL_FEATS.T) / (norm(resnet_avgpool) * norm(RESNET_AVGPOOL_FEATS.T, axis=0))  # cosine similarity
-  resnet_avgpool_top_k_img_ids = resnet_avgpool_similarity.argsort()[-(K+1):-1][::-1]
-  resnet_avgpool_top_k_imgs = [config.DATASET[RESNET_AVGPOOL_IDX[x]][0] for x in resnet_avgpool_top_k_img_ids]
-  top_k_imgs.append(resnet_avgpool_top_k_imgs)
-  top_k_ids.append([RESNET_AVGPOOL_IDX[x] for x in resnet_avgpool_top_k_img_ids])
-
-  resnet_layer3_similarity = (resnet_layer3 @ RESNET_LAYER3_FEATS.T) / (norm(resnet_layer3) * norm(RESNET_LAYER3_FEATS.T, axis=0))  # cosine similarity
-  resnet_layer3_top_k_img_ids = resnet_layer3_similarity.argsort()[-(K+1):-1][::-1]
-  resnet_layer3_top_k_imgs = [config.DATASET[RESNET_LAYER3_IDX[x]][0] for x in resnet_layer3_top_k_img_ids]
-  top_k_imgs.append(resnet_layer3_top_k_imgs)
-  top_k_ids.append([RESNET_LAYER3_IDX[x] for x in resnet_layer3_top_k_img_ids])
-
-  resnet_fc_similarity = np.abs(resnet_fc[np.newaxis, :] - RESNET_FC_FEATS).sum(-1)  # manhattan distance
-  resnet_fc_top_k_img_ids = resnet_fc_similarity.argsort()[1:K+1]
-  resnet_fc_top_k_imgs = [config.DATASET[RESNET_FC_IDX[x]][0] for x in resnet_fc_top_k_img_ids]
-  top_k_imgs.append(resnet_fc_top_k_imgs)
-  top_k_ids.append([RESNET_FC_IDX[x] for x in resnet_fc_top_k_img_ids])
-
-  helper.save_top_k(img, img_id, top_k_imgs, top_k_ids, K, f'outputs/{img_id}.png')
-  '''
 
 if __name__ == '__main__':
+  K = int(input('Input K for top-k: '))
   while True:
     img_id = int(input(f'Enter an image id [0, {len(config.DATASET)-1}]: '))
     if img_id < 0 or img_id >= len(config.DATASET): print(f'img id invalid. should be between [0, {len(config.DATASET)-1}], try again. you got it!')
