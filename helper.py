@@ -19,25 +19,25 @@ def get_user_input(inp: str, len_ds: int):
   ret = {}
   for x in inp.split(','):
     try:
-      if x == 'K': ret[x] = int(input('Input K for top-k: '))
+      if x == 'K':
+        ret[x] = int(input('Input K for top-k: '))
+        if ret[x] == 0: raise ValueError(f'K needs to be greater than 0. Given: {ret[x]}')
 
       elif x == 'img_id':
-        while True:
-          ret[x] = int(input(f'Enter an image id [0, {len_ds}]: '))
-          if ret[x] < 0 or ret[x] >= len_ds:
-            print(f'img id invalid. should be between [0, {len_ds}], try again. you got it!')
-          else: break
+        ret[x] = int(input(f'Enter an image id [0, {len_ds}]: '))
+        if ret[x] < 0 or ret[x] >= len_ds:
+          raise ValueError(f'img id invalid. should be between [0, {len_ds}], try again. you got it!')
 
       elif x == 'feat_space':
         fd_id = int(input('''Enter id of feature descriptor
 
-  1: color_moment
-  2: hog
-  3: resnet_layer3
-  4: resnet_avgpool
-  5: resnet_fc
+1: color_moment
+2: hog
+3: resnet_layer3
+4: resnet_avgpool
+5: resnet_fc
 
-  >'''
+>'''
         ))
         if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
         ret[x] = feature_descriptor_dict[fd_id]
