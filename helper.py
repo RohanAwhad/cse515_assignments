@@ -6,6 +6,48 @@ import matplotlib.pyplot as plt
 import pickle
 import bz2
 
+
+def get_user_input(inp: str, len_ds: int):
+  feature_descriptor_dict = {
+    1: 'color_moment',
+    2: 'hog',
+    3: 'resnet_layer3',
+    4: 'resnet_avgpool',
+    5: 'resnet_fc',
+  }
+
+  ret = {}
+  for x in inp.split(','):
+    try:
+      if x == 'K': ret[x] = int(input('Input K for top-k: '))
+
+      elif x == 'img_id':
+        while True:
+          ret[x] = int(input(f'Enter an image id [0, {len_ds}]: '))
+          if ret[x] < 0 or ret[x] >= len_ds:
+            print(f'img id invalid. should be between [0, {len_ds}], try again. you got it!')
+          else: break
+
+      elif x == 'feat_space':
+        fd_id = int(input('''Enter id of feature descriptor
+
+  1: color_moment
+  2: hog
+  3: resnet_layer3
+  4: resnet_avgpool
+  5: resnet_fc
+
+  >'''
+        ))
+        if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
+        ret[x] = feature_descriptor_dict[fd_id]
+
+    except KeyboardInterrupt:
+      print('\nBye bye ...')
+      exit(0)
+
+  return ret
+
 def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_label, similarity_function):
   n_rows = 2
   fig, axes = plt.subplots(n_rows, K, figsize=(K*2, n_rows*2))

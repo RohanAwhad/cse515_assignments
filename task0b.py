@@ -4,6 +4,7 @@ import config
 import helper
 import similarity_metrics
 
+from config import SIMILARITY_FUNC, METRIC, IDX, FEAT_DB
 from feature_descriptor import FeatureDescriptor
 
 # 3rd-party libs
@@ -18,114 +19,20 @@ from numpy.linalg import norm
 
 feature_descriptor = FeatureDescriptor(net=config.RESNET_MODEL)
 
-print('Loading embeddings ... ')
-COLOR_MMT_IDX, COLOR_MMT_FEATS = helper.load_data('color_moment')
-HOG_IDX, HOG_FEATS = helper.load_data('hog')
-RESNET_AVGPOOL_IDX, RESNET_AVGPOOL_FEATS = helper.load_data('resnet_avgpool')
-RESNET_LAYER3_IDX, RESNET_LAYER3_FEATS = helper.load_data('resnet_layer3')
-RESNET_FC_IDX, RESNET_FC_FEATS = helper.load_data('resnet_fc')
-
-HOG_FEATS = torch.tensor(HOG_FEATS)
-class Retriever:
-# TODO (rohan): Instead of having feature wise retrieval, wouldn't it better if we could have distance calculation functions, which would give back similarity scores and indices, based on argmin, or argmax
-  def __init__(self,
-    color_mmt_idx,
-    color_mmt_feats,
-    hog_idx,
-    hog_feats,
-    resnet_avgpool_idx,
-    resnet_avgpool_feats,
-    resnet_layer3_idx,
-    resnet_layer3_feats,
-    resnet_fc_idx,
-    resnet_fc_feats,
-  ):
-    self.color_mmt_feats = color_mmt_feats
-    self.hog_feats = hog_feats
-    self.resnet_avgpool_feats = resnet_avgpool_feats
-    self.resnet_layer3_feats = resnet_layer3_feats
-    self.resnet_fc_feats = resnet_fc_feats
-
-    self.color_mmt_idx = color_mmt_idx
-    self.hog_idx = hog_idx
-    self.resnet_avgpool_idx = resnet_avgpool_idx
-    self.resnet_layer3_idx = resnet_layer3_idx
-    self.resnet_fc_idx = resnet_fc_idx
-
-  def retrieve_using_color_moments(self, query_feats):
-    '''Retrieve using Pearson Coefficient'''
-    return similarity_metrics.pearson_coefficient(query_feats, self.color_mmt_feats, self.color_mmt_idx, K)
-
-  def retrieve_using_hog(self, query_feats):
-    '''Retrieve using Intersection Similarity'''
-    return similarity_metrics.intersection_similarity(query_feats, self.hog_feats, self.hog_idx, K)
-
-  def retrieve_using_resnet_avgpool(self, query_feats):
-    '''Retrieve using Cosine Similarity '''
-    return similarity_metrics.cosine_similarity(query_feats, self.resnet_avgpool_feats, self.resnet_avgpool_idx, K)
-
-  def retrieve_using_resnet_layer3(self, query_feats):
-    '''Retrieve using Cosine Similarity '''
-    return similarity_metrics.cosine_similarity(query_feats, self.resnet_layer3_feats, self.resnet_layer3_idx, K)
-
-  def retrieve_using_resnet_fc(self, query_feats):
-    '''Retrieve using Manhattan Distance'''
-    return similarity_metrics.manhattan_distance(query_feats, self.resnet_fc_feats, self.resnet_fc_idx, K)
-    query_feats = query_feats.numpy()
-    similarity_scores = np.abs(query_feats[np.newaxis, :] - self.resnet_fc_feats).sum(-1)  # manhattan distance
-    ss_arg_idx = similarity_scores.argsort()[:K]
-    top_k_scores = [similarity_scores[x] for x in ss_arg_idx]
-    top_k_idx = [self.resnet_layer3_idx[x][0] for x in ss_arg_idx]
-    return top_k_idx, top_k_scores
-
-
-retriever = Retriever(
-  COLOR_MMT_IDX,
-  COLOR_MMT_FEATS,
-  HOG_IDX,
-  HOG_FEATS,
-  RESNET_AVGPOOL_IDX,
-  RESNET_AVGPOOL_FEATS,
-  RESNET_LAYER3_IDX,
-  RESNET_LAYER3_FEATS,
-  RESNET_FC_IDX,
-  RESNET_FC_FEATS,
-)
-
-FEAT_DESC_TO_SIMILARITY_METRIC = {
-  'color_moment': 'pearson_coefficient',
-  'hog': 'intersection_similarity',
-  'resnet_avgpool': 'cosine_similarity',
-  'resnet_layer3': 'cosine_similarity',
-  'resnet_fc': 'manhattan_distance'
-}
-FEAT_DESC_TO_RETRIEVAL_FUNC = {
-  'color_moment': retriever.retrieve_using_color_moments,
-  'hog': retriever.retrieve_using_hog,
-  'resnet_avgpool': retriever.retrieve_using_resnet_avgpool,
-  'resnet_layer3': retriever.retrieve_using_resnet_layer3,
-  'resnet_fc': retriever.retrieve_using_resnet_fc,
-}
-
-def retrieve(img_id, feature_desc):
+def retrieve(img_id, feature_desc, K):
   img = config.DATASET[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
 
-  retriever = FEAT_DESC_TO_RETRIEVAL_FUNC[feature_desc]
-  feats = feature_descriptor.extract_features(img, feature_desc)
-  top_k_ids, top_k_scores = retriever(feats)
+  query_feat = feature_descriptor.extract_features(img, feature_desc)
+  get_similarity, similarity_metric, feat_db_idx, feat_db = config.FEAT_DESC_FUNCS[feature_desc]
+  top_k_ids, top_k_scores = get_similarity(query_feat, feat_db, feat_db_idx, K)
   top_k_imgs = [config.DATASET[x][0] for x in top_k_ids]
-  helper.plot(img, img_id, top_k_imgs, top_k_ids, top_k_scores, K, feature_desc, FEAT_DESC_TO_SIMILARITY_METRIC[feature_desc])
+  helper.plot(img, img_id, top_k_imgs, top_k_ids, top_k_scores, K, feature_desc, similarity_metric)
 
+
+  
 
 if __name__ == '__main__':
-  K = int(input('Input K for top-k: '))
   while True:
-    img_id = int(input(f'Enter an image id [0, {len(config.DATASET)-1}]: '))
-    if img_id < 0 or img_id >= len(config.DATASET): print(f'img id invalid. should be between [0, {len(config.DATASET)-1}], try again. you got it!')
-    else:
-      retrieve(img_id, 'color_moment')
-      retrieve(img_id, 'hog')
-      retrieve(img_id, 'resnet_avgpool')
-      retrieve(img_id, 'resnet_layer3')
-      retrieve(img_id, 'resnet_fc')
+    inp = helper.get_user_input('K,img_id,feat_space', len(config.DATASET))
+    retrieve(inp['img_id'], inp['feat_space'], inp['K'])
