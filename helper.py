@@ -7,7 +7,7 @@ import pickle
 import bz2
 
 
-def get_user_input(inp: str, len_ds: int):
+def get_user_input(inp: str, len_ds: int, max_label_val: int):
   feature_descriptor_dict = {
     1: 'color_moment',
     2: 'hog',
@@ -24,9 +24,9 @@ def get_user_input(inp: str, len_ds: int):
         if ret[x] == 0: raise ValueError(f'K needs to be greater than 0. Given: {ret[x]}')
 
       elif x == 'img_id':
-        ret[x] = int(input(f'Enter an image id [0, {len_ds}]: '))
+        ret[x] = int(input(f'Enter an image id [0, {len_ds-1}]: '))
         if ret[x] < 0 or ret[x] >= len_ds:
-          raise ValueError(f'img id invalid. should be between [0, {len_ds}], try again. you got it!')
+          raise ValueError(f'img id invalid. should be between [0, {len_ds-1}], try again. you got it!')
 
       elif x == 'feat_space':
         fd_id = int(input('''Enter id of feature descriptor
@@ -42,6 +42,15 @@ def get_user_input(inp: str, len_ds: int):
         if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
         ret[x] = feature_descriptor_dict[fd_id]
 
+      elif x == 'label':
+        ret[x] = int(input(f'Enter a query label [0, {max_label_val}]: '))
+        if ret[x] < 0 or ret[x] > max_label_val:
+          raise ValueError(f'label invalid. should be between [0, {max_label_val}], try again. you got it!')
+
+      else:
+        raise ValueError(f'{x} not yet implemented')
+
+
     except KeyboardInterrupt:
       print('\nBye bye ...')
       exit(0)
@@ -49,23 +58,25 @@ def get_user_input(inp: str, len_ds: int):
   return ret
 
 def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_label, similarity_function):
-  n_rows = 2
+  n_rows = 1 if img is None else 2
   fig, axes = plt.subplots(n_rows, K, figsize=(K*2, n_rows*2))
-  axes[0, 0].imshow(img)
-  axes[0, 0].set_xlabel(f'Img ID: {query_img_id}')
-  axes[0, 0].set_xticks([])
-  axes[0, 0].set_yticks([])
-  for i in range(1, K): axes[0, i].axis('off')
+  if img is not None:
+    axes[0, 0].imshow(img)
+    axes[0, 0].set_xlabel(f'Img ID: {query_img_id}')
+    axes[0, 0].set_xticks([])
+    axes[0, 0].set_yticks([])
+    for i in range(1, K): axes[0, i].axis('off')
 
   for i, (img, idx, score) in enumerate(zip(top_k_imgs, top_k_ids, top_k_img_scores)):
-    ax = axes[1, i]
+    ax = axes[i] if n_rows == 1 else axes[1, i]
     ax.set_xlabel(f'Img ID: {idx}\nScore/Distance: {score:0.2f}')
     if img.mode == 'L': img = img.convert('RGB')
     ax.imshow(img)
     ax.set_xticks([])
     ax.set_yticks([])
 
-  axes[1, 0].set_ylabel(similarity_function)
+  if n_rows == 2: axes[1, 0].set_ylabel(similarity_function)
+  else: axes[0].set_ylabel(similarity_function)
   fig.suptitle(row_label)
   plt.tight_layout()
   plt.show()

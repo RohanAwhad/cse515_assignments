@@ -35,7 +35,7 @@ for fd in ('color_moment', 'hog'):
 
 embd_idx_to_img_id = dict()
 l3_list, ap_list, fc_list = [], [], []
-for img_id, (img, _) in tqdm(enumerate(config.DATASET), total=len(config.DATASET), desc='ResNet feats'):
+for img_id, (img, label) in tqdm(enumerate(config.DATASET), total=len(config.DATASET), desc='ResNet feats'):
   if img_id % 2: continue
   if img.mode == 'L': img = img.convert('RGB')
   tmp = feature_descriptor.extract_resnet_features(img)
