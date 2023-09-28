@@ -25,7 +25,7 @@ def get_label_vecs(feat_space: str):
     label_feat = torch.tensor(feat_db[label_feats, :].mean(0))
     ret.append(label_feat)
 
-  return torch.stack(ret, dim=0).numpy()
+  return torch.stack(ret, dim=0)
   
 
 def retrieve(img_id, feat_space, K):
@@ -34,8 +34,11 @@ def retrieve(img_id, feat_space, K):
 
   img = config.DATASET[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
+
   query_feat = feature_descriptor.extract_features(img, feat_space)
   similarity_metric = config.FEAT_DESC_FUNCS[feat_space][config.SIMILARITY_METRIC]
+
+  if not isinstance(query_feat, torch.Tensor): query_feat = torch.tensor(query_feat)  # TODO (rohan): make torch universal and remove dependency on numpy
   similarity_scores = get_similarity(query_feat, feat_db, similarity_metric)
   top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, feat_db_idx, K)
 
