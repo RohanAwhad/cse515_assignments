@@ -26,8 +26,9 @@ def retrieve(label, feature_desc, K):
   label_feat = torch.tensor(feat_db[label_feats, :].mean(0))
   print(label_feat.shape)
 
-  get_similarity, similarity_metric, feat_db_idx, feat_db = config.FEAT_DESC_FUNCS[feature_desc]
-  top_k_ids, top_k_scores = get_similarity(label_feat, feat_db, feat_db_idx, K)
+  similarity_metric, feat_db_idx, feat_db = config.FEAT_DESC_FUNCS[feature_desc]
+  simiarity_scores = get_similarity(label_feat, feat_db, similarity_metric)
+  top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, feat_db_idx, K)
   top_k_imgs = [config.DATASET[x][0] for x in top_k_ids]
   helper.plot(None, None, top_k_imgs, top_k_ids, top_k_scores, K, feature_desc, similarity_metric)
 

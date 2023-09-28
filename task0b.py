@@ -4,8 +4,8 @@ import config
 import helper
 import similarity_metrics
 
-from config import SIMILARITY_FUNC, METRIC, IDX, FEAT_DB
 from feature_descriptor import FeatureDescriptor
+from similarity_metrics import get_similarity, get_top_k_ids_n_scores
 
 # 3rd-party libs
 import bz2
@@ -24,8 +24,9 @@ def retrieve(img_id, feature_desc, K):
   if img.mode != 'RGB': img = img.convert('RGB')
 
   query_feat = feature_descriptor.extract_features(img, feature_desc)
-  get_similarity, similarity_metric, feat_db_idx, feat_db = config.FEAT_DESC_FUNCS[feature_desc]
-  top_k_ids, top_k_scores = get_similarity(query_feat, feat_db, feat_db_idx, K)
+  similarity_metric, feat_db_idx, feat_db = config.FEAT_DESC_FUNCS[feature_desc]
+  similarity_scores = get_similarity(query_feat, feat_db, similarity_metric)
+  top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, feat_db_idx, K)
   top_k_imgs = [config.DATASET[x][0] for x in top_k_ids]
   helper.plot(img, img_id, top_k_imgs, top_k_ids, top_k_scores, K, feature_desc, similarity_metric)
 

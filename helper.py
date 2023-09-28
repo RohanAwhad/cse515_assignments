@@ -8,7 +8,7 @@ import bz2
 
 
 # TODO (rohan): figure out a way to take image file as input
-def get_user_input(inp: str, len_ds: int, max_label_val: int):
+def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0):
   feature_descriptor_dict = {
     1: 'color_moment',
     2: 'hog',

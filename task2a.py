@@ -4,6 +4,7 @@ import config
 import helper
 
 from feature_descriptor import FeatureDescriptor
+from similarity_metrics import get_top_k_ids_n_scores, get_similarity
 
 # 3rd-party libs
 import functools
@@ -34,8 +35,9 @@ def retrieve(img_id, feat_space, K):
   img = config.DATASET[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
   query_feat = feature_descriptor.extract_features(img, feat_space)
-  get_similarity, similarity_metric, *_ = config.FEAT_DESC_FUNCS[feat_space]
-  top_k_ids, top_k_scores = get_similarity(query_feat, feat_db, feat_db_idx, K)
+  similarity_metric = config.FEAT_DESC_FUNCS[feat_space][config.SIMILARITY_METRIC]
+  similarity_scores = get_similarity(query_feat, feat_db, similarity_metric)
+  top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, feat_db_idx, K)
 
   # print output
   print('-'*50)

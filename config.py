@@ -4,7 +4,6 @@ Changes since Phase 1 submission:
 '''
 
 import helper
-import similarity_metrics
 
 # 3rd-party libs
 
@@ -35,24 +34,16 @@ RESNET_FC_IDX, RESNET_FC_FEATS = helper.load_data('resnet_fc')
 HOG_FEATS = torch.tensor(HOG_FEATS)
 
 # ---
-SIMILARITY_FUNC = 0
-METRIC = 1
-IDX = 2
-FEAT_DB = 3
+SIMILARITY_METRIC = 0
+IDX = 1
+FEAT_DB = 2
 
 FEAT_DESC_FUNCS = {
-  'color_moment': (similarity_metrics.pearson_coefficient, 'pearson_coefficient',COLOR_MMT_IDX, COLOR_MMT_FEATS),
-  'hog': (similarity_metrics.intersection_similarity, 'intersection_similarity',HOG_IDX, HOG_FEATS),
-  'resnet_avgpool': (similarity_metrics.cosine_similarity, 'cosine_similarity',RESNET_AVGPOOL_IDX, RESNET_AVGPOOL_FEATS),
-  'resnet_layer3': (similarity_metrics.cosine_similarity, 'cosine_similarity',RESNET_LAYER3_IDX, RESNET_LAYER3_FEATS),
-  'resnet_fc': (similarity_metrics.manhattan_distance, 'manhattan_distance',RESNET_FC_IDX, RESNET_FC_FEATS),
-}
-
-SIMILARITY_METRIC_FUNC = {
-  'pearson_coefficient': similarity_metrics.pearson_coefficient,
-  'intersection_similarity': similarity_metrics.intersection_similarity,
-  'cosine_similarity': similarity_metrics.cosine_similarity,
-  'manhattan_distance': similarity_metrics.manhattan_distance,
+  'color_moment': ('pearson_coefficient',COLOR_MMT_IDX, COLOR_MMT_FEATS),
+  'hog': ('intersection_similarity',HOG_IDX, HOG_FEATS),
+  'resnet_avgpool': ('cosine_similarity',RESNET_AVGPOOL_IDX, RESNET_AVGPOOL_FEATS),
+  'resnet_layer3': ('cosine_similarity',RESNET_LAYER3_IDX, RESNET_LAYER3_FEATS),
+  'resnet_fc': ('manhattan_distance',RESNET_FC_IDX, RESNET_FC_FEATS),
 }
 
 LATENT_SEMANTICS_DIR = 'latent_semantics'
