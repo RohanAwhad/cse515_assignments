@@ -5,9 +5,13 @@ Changes since Phase 1 submission:
 
 import helper
 
+# python libs
+import os
+from typing import Dict, Tuple, Union
+
 # 3rd-party libs
 
-import os
+import numpy as np
 import torch
 import torchvision
 
@@ -31,14 +35,18 @@ RESNET_LAYER3_IDX, RESNET_LAYER3_FEATS = helper.load_data('resnet_layer3')
 RESNET_FC_IDX, RESNET_FC_FEATS = helper.load_data('resnet_fc')
 
 # preprocessing feats db
-HOG_FEATS = torch.tensor(HOG_FEATS)
+if not isinstance(COLOR_MMT_FEATS, torch.Tensor): COLOR_MMT_FEATS = torch.tensor(COLOR_MMT_FEATS)
+if not isinstance(HOG_FEATS, torch.Tensor): HOG_FEATS = torch.tensor(HOG_FEATS)
+if not isinstance(RESNET_AVGPOOL_FEATS, torch.Tensor): RESNET_AVGPOOL_FEATS = torch.tensor(RESNET_AVGPOOL_FEATS)
+if not isinstance(RESNET_LAYER3_FEATS, torch.Tensor): RESNET_LAYER3_FEATS = torch.tensor(RESNET_LAYER3_FEATS)
+if not isinstance(RESNET_FC_FEATS, torch.Tensor): RESNET_FC_FEATS = torch.tensor(RESNET_FC_FEATS)
 
 # ---
 SIMILARITY_METRIC = 0
 IDX = 1
 FEAT_DB = 2
 
-FEAT_DESC_FUNCS = {
+FEAT_DESC_FUNCS: Dict[str, Tuple[str, Dict[int, Tuple[int, int]], torch.Tensor]] = {
   'color_moment': ('pearson_coefficient',COLOR_MMT_IDX, COLOR_MMT_FEATS),
   'hog': ('intersection_similarity',HOG_IDX, HOG_FEATS),
   'resnet_avgpool': ('cosine_similarity',RESNET_AVGPOOL_IDX, RESNET_AVGPOOL_FEATS),

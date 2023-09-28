@@ -2,28 +2,34 @@
 Changes since Phase 1 Submission:
 - added a plot function to show task0a results during runtime
 '''
-import matplotlib.pyplot as plt
+
+# python libs
 import pickle
 import bz2
 
+from typing import Dict, Union, Tuple, Any
+
+# 3rd-party libs
+import matplotlib.pyplot as plt
+
 
 # TODO (rohan): figure out a way to take image file as input
-def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0):
-  feature_descriptor_dict = {
+def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, Union[str, int]]:
+  feature_descriptor_dict: Dict[int, str] = {
     1: 'color_moment',
     2: 'hog',
     3: 'resnet_layer3',
     4: 'resnet_avgpool',
     5: 'resnet_fc',
   }
-  dim_red_dict = {
+  dim_red_dict: Dict[int, str] = {
     1: 'svd',
     2: 'nnmf',
     3: 'kmeans',
     4: 'lda',
   }
 
-  ret = {}
+  ret: Dict[str, Union[str, int]] = {}
   for x in inp.split(','):
     try:
       if x == 'K':
@@ -133,7 +139,7 @@ def save_data(data_tuple, fd):
   print(f'- compressed size: {len(compressed_bin_file) / 1e6} MB')
   with open(f'features/{fd}.bin', 'wb') as f: f.write(compressed_bin_file)
 
-def load_data(fd):
+def load_data(fd: str) -> Tuple[Any, ...]:
   with open(f'features/{fd}.bin', 'rb') as f: cmprsd_bin = f.read()
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
