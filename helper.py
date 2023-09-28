@@ -137,3 +137,9 @@ def load_data(fd):
   with open(f'features/{fd}.bin', 'rb') as f: cmprsd_bin = f.read()
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
+
+def save_pickle(obj, fn):
+  with open(fn, 'wb') as f: pickle.dump(obj, f)
+
+def load_pickle(fn):
+  with open(fn, 'rb') as f: return pickle.load(f)

@@ -3,10 +3,14 @@ Changes since Phase 1 submission:
 - created this new file and moved global config vars here
 '''
 
-import torch
-import torchvision
 import helper
 import similarity_metrics
+
+# 3rd-party libs
+
+import os
+import torch
+import torchvision
 
 TORCH_HUB = './models/'
 torch.set_grad_enabled(False)
@@ -50,3 +54,7 @@ SIMILARITY_METRIC_FUNC = {
   'cosine_similarity': similarity_metrics.cosine_similarity,
   'manhattan_distance': similarity_metrics.manhattan_distance,
 }
+
+LATENT_SEMANTICS_DIR = 'latent_semantics'
+os.makedirs(LATENT_SEMANTICS_DIR, exist_ok=True)
+LATENT_SEMANTICS_FN = 'latent_semantics/task3_{feat_space}_{dim_red}_{K}.pkl'
