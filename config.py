@@ -48,4 +48,4 @@ FEAT_DESC_FUNCS = {
 
 LATENT_SEMANTICS_DIR = 'latent_semantics'
 os.makedirs(LATENT_SEMANTICS_DIR, exist_ok=True)
-LATENT_SEMANTICS_FN = 'latent_semantics/task3_{feat_space}_{dim_red}_{K}.pkl'
+LATENT_SEMANTICS_FN = 'latent_semantics/task{task}_{feat_space}_{dim_red}_{K}.pkl'

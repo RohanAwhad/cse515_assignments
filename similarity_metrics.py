@@ -41,13 +41,10 @@ def get_similarity(query_vec, db_mat, similarity_metric: str):
   else:
     raise NotImplementedError(f'{similarity_metric} algorithm not implemented')
 
-  return similarity_scores
+  return torch.tensor(similarity_scores)
 
 
 def get_similarity_mat_x_mat(mat1, mat2, similarity_metric):
-  if similarity_metric in ('pearson_coefficient', 'intersection_similarity'):
-    return torch.stack([get_similarity(row, mat2, similarity_metric) for row in mat1])
-
-  else: return get_similarity(mat1, mat2, similarity_metric)
+  return torch.stack([get_similarity(row, mat2, similarity_metric) for row in mat1])
 
     
