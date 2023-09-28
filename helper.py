@@ -16,6 +16,12 @@ def get_user_input(inp: str, len_ds: int, max_label_val: int):
     4: 'resnet_avgpool',
     5: 'resnet_fc',
   }
+  dim_red_dict = {
+    1: 'svd',
+    2: 'nnmf',
+    3: 'kmeans',
+    4: 'lda',
+  }
 
   ret = {}
   for x in inp.split(','):
@@ -47,6 +53,18 @@ def get_user_input(inp: str, len_ds: int, max_label_val: int):
         ret[x] = int(input(f'Enter a query label [0, {max_label_val}]: '))
         if ret[x] < 0 or ret[x] > max_label_val:
           raise ValueError(f'label invalid. should be between [0, {max_label_val}], try again. you got it!')
+      elif x == 'dim_red':
+        _id = int(input('''Enter id of dimension reductionality algorithm to use:
+
+1: svd
+2: nnmf
+3: kmeans
+4: lda
+
+>'''
+        ))
+        if not (0 < _id < 5): raise ValueError('value should be between [1, 4]')
+        ret[x] = dim_red_dict[_id]
 
       else:
         raise ValueError(f'{x} not yet implemented')
