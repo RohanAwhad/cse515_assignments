@@ -13,9 +13,9 @@ def get_top_k_ids_n_scores(
   similarity_scores: torch.Tensor, idx_dict: Dict[int, Tuple[int, int]], K: int
 ) -> Tuple[List[int], List[float]]:
 
-  ss_arg_idx = similarity_scores.argsort()[-K:][::-1]
+  ss_arg_idx = reversed(similarity_scores.argsort()[-K:])
   top_k_scores = [similarity_scores[x].item() for x in ss_arg_idx]
-  top_k_idx = [idx_dict[x][0] for x in ss_arg_idx]
+  top_k_idx = [idx_dict[x.item()][0] for x in ss_arg_idx]
   return top_k_idx, top_k_scores
 
 def get_similarity(query_vec: torch.Tensor, db_mat: torch.Tensor, similarity_metric: str) -> torch.Tensor:
