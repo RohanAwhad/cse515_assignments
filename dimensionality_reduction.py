@@ -21,7 +21,7 @@ def reduce_(feat_db, K, dim_red):
   elif dim_red == 'kmeans':
     components, *_ = KMeans(feat_db, n_clusters=K)  # TODO (rohan): calculate similarity between feat_db and W and return them as imageid-weight pairs
     weight_mat = None
-    pass
+    raise NotImplementedError('for kmeans haven\'t yet calculated weight matrix')
 
   else:
     raise NotImplementedError(f'Haven\'t implemented {dim_red} algorithm')

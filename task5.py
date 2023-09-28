@@ -24,7 +24,7 @@ def get_label_vecs(feat_space: str):
     label_feat = torch.tensor(feat_db[label_feats, :].mean(0))
     ret.append(label_feat)
 
-  return torch.stack(ret, dim=0).numpy()
+  return torch.stack(ret, dim=0)
 
 if __name__ == '__main__':
   #inp = helper.get_user_input('feat_space,K,dim_red', None, None)
@@ -32,8 +32,8 @@ if __name__ == '__main__':
     #'feat_space': 'color_moment',
     #'feat_space': 'hog',
     #'feat_space': 'resnet_layer3',
-    #'feat_space': 'resnet_avgpool',
-    'feat_space': 'resnet_fc',
+    'feat_space': 'resnet_avgpool',
+    #'feat_space': 'resnet_fc',
     'K': 5,
     'dim_red': 'svd'
   }
