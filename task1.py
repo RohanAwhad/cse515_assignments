@@ -4,6 +4,7 @@ import config
 import helper
 
 from feature_descriptor import FeatureDescriptor
+from similarity_metrics import get_similarity, get_top_k_ids_n_scores
 
 # 3rd-party libs
 import torch
@@ -27,7 +28,7 @@ def retrieve(label, feature_desc, K):
   print(label_feat.shape)
 
   similarity_metric, feat_db_idx, feat_db = config.FEAT_DESC_FUNCS[feature_desc]
-  simiarity_scores = get_similarity(label_feat, feat_db, similarity_metric)
+  similarity_scores = get_similarity(label_feat, feat_db, similarity_metric)
   top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, feat_db_idx, K)
   top_k_imgs = [config.DATASET[x][0] for x in top_k_ids]
   helper.plot(None, None, top_k_imgs, top_k_ids, top_k_scores, K, feature_desc, similarity_metric)
