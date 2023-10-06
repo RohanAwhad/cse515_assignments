@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import torchvision
 
+DEBUG = int(os.environ.get('DEBUG', 0))
 TORCH_HUB = './models/'
 torch.set_grad_enabled(False)
 torch.hub.set_dir(TORCH_HUB)
