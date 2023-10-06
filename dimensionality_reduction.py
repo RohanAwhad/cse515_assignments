@@ -16,7 +16,7 @@ def reduce_(feat_db, K, dim_red):
     components = model.components_
 
   elif dim_red == 'nnmf':
-    weight_mat, components, _ = NNMF(feat_db, n_components=K)
+    weight_mat, components, _ = NNMF(abs(feat_db), n_components=K)
 
   elif dim_red == 'kmeans':
     components, *_ = KMeans(feat_db, n_clusters=K)  # TODO (rohan): calculate similarity between feat_db and W and return them as imageid-weight pairs
