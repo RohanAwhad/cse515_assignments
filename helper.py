@@ -12,8 +12,12 @@ from typing import Dict, Union, Tuple, Any
 # 3rd-party libs
 import matplotlib.pyplot as plt
 
+from PIL import Image
 
-# TODO (rohan): figure out a way to take image file as input
+
+def load_img_file(fn):
+  return Image.open(fn)
+
 def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, Union[str, int]]:
   feature_descriptor_dict: Dict[int, str] = {
     1: 'color_moment',
@@ -37,9 +41,13 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
         if ret[x] == 0: raise ValueError(f'K needs to be greater than 0. Given: {ret[x]}')
 
       elif x == 'img_id':
-        ret[x] = int(input(f'Enter an image id [0, {len_ds-1}]: '))
-        if ret[x] < 0 or ret[x] >= len_ds:
-          raise ValueError(f'img id invalid. should be between [0, {len_ds-1}], try again. you got it!')
+        is_img_fn = input('Do you want to enter image filename? (y/N): ').lower()
+        if is_img_fn == 'y':
+          ret[x] = input('Enter filename: ')
+        else:
+          ret[x] = int(input(f'Enter an image id [0, {len_ds-1}]: '))
+          if ret[x] < 0 or ret[x] >= len_ds:
+            raise ValueError(f'img id invalid. should be between [0, {len_ds-1}], try again. you got it!')
 
       elif x == 'feat_space':
         fd_id = int(input('''Enter id of feature descriptor

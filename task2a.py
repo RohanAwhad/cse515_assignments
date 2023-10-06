@@ -32,7 +32,8 @@ def retrieve(img_id, feat_space, K):
   feat_db = get_label_vecs(feat_space)
   feat_db_idx = dict((x, (x,)) for x in range(len(feat_db)))
 
-  img = config.DATASET[img_id][0]
+  if isinstance(img_id, str): img = helper.load_img_file(img_id)
+  else: img = config.DATASET[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
 
   query_feat = feature_descriptor.extract_features(img, feat_space)

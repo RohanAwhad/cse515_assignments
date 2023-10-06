@@ -20,7 +20,8 @@ from numpy.linalg import norm
 feature_descriptor = FeatureDescriptor(net=config.RESNET_MODEL)
 
 def retrieve(img_id, feature_desc, K):
-  img = config.DATASET[img_id][0]
+  if isinstance(img_id, str): img = helper.load_img_file(img_id)
+  else: img = config.DATASET[img_id][0]
   if img.mode != 'RGB': img = img.convert('RGB')
 
   query_feat = feature_descriptor.extract_features(img, feature_desc)
