@@ -4,7 +4,6 @@ import config
 import helper
 import dimensionality_reduction
 
-SPACE = ' '
 def print_img_id_weight_pairs(weight_mat, idx_dict):
   for i, row in enumerate(weight_mat):
     print()
