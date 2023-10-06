@@ -26,25 +26,26 @@ def get_label_vecs(feat_space: str):
 
   return torch.stack(ret, dim=0)
 
-if __name__ == '__main__':
-  #inp = helper.get_user_input('feat_space,K,dim_red', None, None)
-  inp = {
-    #'feat_space': 'color_moment',
-    #'feat_space': 'hog',
-    #'feat_space': 'resnet_layer3',
-    'feat_space': 'resnet_avgpool',
-    #'feat_space': 'resnet_fc',
-    'K': 5,
-    'dim_red': 'svd'
-  }
-  #feat_db = config.FEAT_DESC_FUNCS[inp['feat_space']][config.FEAT_DB]
-  #TODO (rohan): feat_db of label-label similarity matrix
-  feat_db = get_label_vecs(inp['feat_space'])
-  similarity_metric = config.FEAT_DESC_FUNCS[inp['feat_space']][config.SIMILARITY_METRIC]
-  similarity_scores = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
-  print(similarity_scores.shape)
-  W, H = dimensionality_reduction.reduce_(similarity_scores, inp['K'], inp['dim_red'])
-  print(W.shape, H.shape)
-  helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task='5_label_label_simi_mat', **inp))
+def print_label_weight_pairs(weight_mat):
+  for i, row in enumerate(weight_mat):
+    print()
+    print(f'Label: {i:3d}')
+    row = [(x, j) for j, x in enumerate(row)]
+    row = sorted(row, key=lambda x: x[0], reverse=True)
+    for x, j in row:
+      print(f' - Latent Feat {j:3d}\t\tWeight := {x:10.3f}')
 
-  
+  print('='*53)
+
+
+def main():
+    inp = helper.get_user_input('feat_space,K,dim_red', None, None)
+    feat_db = get_label_vecs(inp['feat_space'])
+    similarity_metric = config.FEAT_DESC_FUNCS[inp['feat_space']][config.SIMILARITY_METRIC]
+    similarity_scores = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
+    W, H = dimensionality_reduction.reduce_(similarity_scores, inp['K'], inp['dim_red'])
+    helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task='5_label_label_simi_mat', **inp))
+    print_label_weight_pairs(W)
+
+if __name__ == '__main__':
+  while True: main()
