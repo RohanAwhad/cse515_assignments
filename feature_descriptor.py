@@ -26,7 +26,7 @@ class FeatureDescriptor:
       self.net.get_submodule('fc').register_forward_hook(self.save_out),
     ]
 
-  def extract_features(self, img: Union[PIL.Image, np.array, torch.Tensor], descriptor: str):
+  def extract_features(self, img: Union[PIL.Image.Image, np.array, torch.Tensor], descriptor: str):
     if descriptor == 'hog': return self.extract_hog_features(img)
     elif descriptor == 'color_moment': return self.extract_color_moments(img)
     elif descriptor == 'resnet_layer3': return self.extract_resnet_features(img)[0]
