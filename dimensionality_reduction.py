@@ -2,6 +2,8 @@ from sklearn.decomposition import TruncatedSVD as SVD
 from sklearn.decomposition import LatentDirichletAllocation as LDA
 from sklearn.decomposition import non_negative_factorization as NNMF
 from sklearn.cluster import k_means as KMeans
+from tensorly.decomposition import parafac
+import numpy
 
 def reduce_(feat_db, K, dim_red):
 
@@ -22,7 +24,11 @@ def reduce_(feat_db, K, dim_red):
     components, *_ = KMeans(feat_db, n_clusters=K)  # TODO (rohan): calculate similarity between feat_db and W and return them as imageid-weight pairs
     weight_mat = None
     raise NotImplementedError('for kmeans haven\'t yet calculated weight matrix')
-
+  
+  elif dim_red == 'cp':
+    factors = parafac(feat_db.numpy(), rank=K)
+    weight_mat=factors[1][2]
+    components = None
   else:
     raise NotImplementedError(f'Haven\'t implemented {dim_red} algorithm')
 
