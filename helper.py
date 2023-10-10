@@ -13,7 +13,7 @@ from typing import Dict, Union, Tuple, Any
 import matplotlib.pyplot as plt
 
 from PIL import Image
-
+import os
 
 def load_img_file(fn):
   return Image.open(fn)
@@ -145,6 +145,9 @@ def save_data(data_tuple, fd):
   print(fd)
   print(f'- orginal size: {len(binary_file) / 1e6} MB')
   print(f'- compressed size: {len(compressed_bin_file) / 1e6} MB')
+  if not os.path.exists("features/"):
+    os.makedirs('features/')
+     
   with open(f'features/{fd}.bin', 'wb') as f: f.write(compressed_bin_file)
 
 def load_data(fd: str) -> Tuple[Any, ...]:
