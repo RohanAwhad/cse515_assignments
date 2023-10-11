@@ -24,9 +24,9 @@ def main():
   train_latent_space = np.dot(feat_db, np.transpose(latent_space))
   train_latent_space = torch.tensor(train_latent_space)
   query_latent_space = np.dot(query_feat, np.transpose(latent_space))
+  query_latent_space = torch.tensor(query_latent_space)
 
-
-  similarity_scores = get_similarity(query_feat, feat_db, similarity_metric)
+  similarity_scores = get_similarity(query_latent_space, train_latent_space, similarity_metric)
   top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, idx_dict, inp['K'])
   top_k_imgs = [config.DATASET[x][0] for x in top_k_ids]
   helper.plot(img, inp['img_id'], top_k_imgs, top_k_ids, top_k_scores, inp['K'], inp['feat_space'], similarity_metric)
