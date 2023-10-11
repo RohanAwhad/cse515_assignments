@@ -155,6 +155,16 @@ def load_data(fd: str) -> Tuple[Any, ...]:
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
 
+def load_semantics(fd: str) -> Tuple[Any, ...]:
+  # List all files in the directory
+  files = os.listdir("latent_semantics/")
+  for filename in files:
+    if fd in filename:
+      fd = filename
+
+  with open(f'latent_semantics/{fd}', 'rb') as f: data = pickle.load(f)
+  return data
+
 def save_pickle(obj, fn):
   with open(fn, 'wb') as f: pickle.dump(obj, f)
 
