@@ -58,6 +58,7 @@ FEAT_DESC_FUNCS: Dict[str, Tuple[str, Dict[int, Tuple[int, int]], torch.Tensor]]
 LATENT_SEMANTICS_DIR = 'latent_semantics'
 os.makedirs(LATENT_SEMANTICS_DIR, exist_ok=True)
 LATENT_SEMANTICS_FN = 'latent_semantics/task{task}_{feat_space}_{dim_red}_{K}.pkl'
+LATENT_SEMANTICS_MODES_FN = 'latent_semantics/task{task}_{feat_space}_{dim_red}_{K}_{mode}.pkl'
 
 SIMI_MAT_DIR = 'similarity_matrices'
 os.makedirs(SIMI_MAT_DIR, exist_ok=True)
