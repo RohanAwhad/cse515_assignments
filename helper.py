@@ -4,8 +4,9 @@ Changes since Phase 1 Submission:
 '''
 
 # python libs
-import pickle
 import bz2
+import os
+import pickle
 
 from typing import Dict, Union, Tuple, Any
 
@@ -148,7 +149,11 @@ def save_data(data_tuple, fd):
   with open(f'features/{fd}.bin', 'wb') as f: f.write(compressed_bin_file)
 
 def load_data(fd: str) -> Tuple[Any, ...]:
-  with open(f'features/{fd}.bin', 'rb') as f: cmprsd_bin = f.read()
+  data_fn = f'features/{fd}.bin'
+  if not os.path.exists(data_fn):
+    return (None, None)
+    raise ValueError(f'\'{data_fn}\' does not exist')
+  with open(data_fn, 'rb') as f: cmprsd_bin = f.read()
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
 
