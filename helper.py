@@ -116,23 +116,47 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
 def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_label, similarity_function):
   n_rows = 1 if img is None else 2
   fig, axes = plt.subplots(n_rows, K, figsize=(K*2, n_rows*2))
-  if img is not None:
-    axes[0, 0].imshow(img)
-    axes[0, 0].set_xlabel(f'Img ID: {query_img_id}')
-    axes[0, 0].set_xticks([])
-    axes[0, 0].set_yticks([])
-    for i in range(1, K): axes[0, i].axis('off')
 
-  for i, (img, idx, score) in enumerate(zip(top_k_imgs, top_k_ids, top_k_img_scores)):
-    ax = axes[i] if n_rows == 1 else axes[1, i]
+  if K == 1:
+    if img is not None:
+      axes[0].imshow(img)
+      axes[0].set_xlabel(f'Img ID: {query_img_id}')
+      axes[0].set_xticks([])
+      axes[0].set_yticks([])
+
+    img = top_k_imgs[0]
+    idx = top_k_ids[0]
+    score = top_k_img_scores[0]
+
+    ax = axes[1]
     ax.set_xlabel(f'Img ID: {idx}\nScore/Distance: {score:0.2f}')
     if img.mode == 'L': img = img.convert('RGB')
     ax.imshow(img)
     ax.set_xticks([])
     ax.set_yticks([])
 
-  if n_rows == 2: axes[1, 0].set_ylabel(similarity_function)
-  else: axes[0].set_ylabel(similarity_function)
+    if n_rows == 2: ax.set_ylabel(similarity_function)
+    else: axes[0].set_ylabel(similarity_function)
+
+  else:
+    if img is not None:
+      axes[0, 0].imshow(img)
+      axes[0, 0].set_xlabel(f'Img ID: {query_img_id}')
+      axes[0, 0].set_xticks([])
+      axes[0, 0].set_yticks([])
+      for i in range(1, K): axes[0, i].axis('off')
+
+    for i, (img, idx, score) in enumerate(zip(top_k_imgs, top_k_ids, top_k_img_scores)):
+      ax = axes[i] if n_rows == 1 else axes[1, i]
+      ax.set_xlabel(f'Img ID: {idx}\nScore/Distance: {score:0.2f}')
+      if img.mode == 'L': img = img.convert('RGB')
+      ax.imshow(img)
+      ax.set_xticks([])
+      ax.set_yticks([])
+
+    if n_rows == 2: axes[1, 0].set_ylabel(similarity_function)
+    else: axes[0].set_ylabel(similarity_function)
+
   fig.suptitle(row_label)
   plt.tight_layout()
   plt.show()
