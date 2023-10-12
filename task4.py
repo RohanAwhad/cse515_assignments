@@ -34,12 +34,15 @@ def create_tensor(weight_mat, idx_dict):
 def main():
   inp = helper.get_user_input('feat_space,K')
   inp['dim_red'] = 'cp'
+  
   _tmp = config.FEAT_DESC_FUNCS[inp['feat_space']]
   feat_db, idx_dict = _tmp[config.FEAT_DB], _tmp[config.IDX]
   tensor = create_tensor(feat_db,idx_dict)
   W,_ = dimensionality_reduction.reduce_(tensor, inp['K'], 'cp')
-  helper.save_pickle(np.transpose(W), config.LATENT_SEMANTICS_FN.format(task=4, **inp))
-  print_img_id_weight_pairs(W, idx_dict)
+  for j,i in enumerate(['image','feature','label']):
+    inp['mode'] = i
+    helper.save_pickle(np.transpose(W[j]), config.LATENT_SEMANTICS_MODES_FN.format(task=4, **inp))
+  print_img_id_weight_pairs(W[2], idx_dict)
 
 
 if __name__ == '__main__':

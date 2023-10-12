@@ -28,7 +28,7 @@ def get_label_vecs(feat_space: str):
   
 
 def main():
-  inp = helper.get_user_input('feat_space,K,dim_red,img_id',len(config.DATASET))
+  inp = helper.get_user_input('task_id,feat_space,K,dim_red,img_id',len(config.DATASET))
   _tmp = config.FEAT_DESC_FUNCS[inp['feat_space']]
   feat_db, idx_dict, similarity_metric = _tmp[config.FEAT_DB], _tmp[config.IDX], _tmp[config.SIMILARITY_METRIC]
   feat_db_labels = get_label_vecs(inp['feat_space'])
