@@ -45,6 +45,12 @@ def main():
     similarity_scores = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
     W, H = dimensionality_reduction.reduce_(similarity_scores, inp['K'], inp['dim_red'])
     helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task='5_label_label_simi_mat', **inp))
+    save_fn = config.SIMI_MAT_FN.format(
+      feat_space=inp['feat_space'],
+      mat1='label',
+      mat2='label'
+    )
+    helper.save_pickle(similarity_scores, save_fn)
     print_label_weight_pairs(W)
 
 if __name__ == '__main__':

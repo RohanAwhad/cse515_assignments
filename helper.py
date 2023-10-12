@@ -14,7 +14,7 @@ from typing import Dict, Union, Tuple, Any
 import matplotlib.pyplot as plt
 
 from PIL import Image
-
+import os
 
 def load_img_file(fn):
   return Image.open(fn)
@@ -33,12 +33,22 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
     3: 'kmeans',
     4: 'lda',
   }
+  latent_semantic_dict: Dict[int, str] = {
+    3: 'svd',
+    4: 'nnmf',
+    5: 'kmeans',
+    6: 'lda',
+  }
 
   ret: Dict[str, Union[str, int]] = {}
   for x in inp.split(','):
     try:
       if x == 'K':
         ret[x] = int(input('Input K for top-k: '))
+        if ret[x] == 0: raise ValueError(f'K needs to be greater than 0. Given: {ret[x]}')
+      
+      elif x == 'K_latent':
+        ret[x] = int(input('Input K for latent space: '))
         if ret[x] == 0: raise ValueError(f'K needs to be greater than 0. Given: {ret[x]}')
 
       elif x == 'img_id':
@@ -63,6 +73,18 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
         ))
         if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
         ret[x] = feature_descriptor_dict[fd_id]
+
+      elif x == 'task_id':
+        task_id = int(input('''Enter id of task
+
+3: LS1
+4: LS2
+5: LS3
+6: LS4  
+>'''
+        ))
+        if not (3 <= task_id <= 6): raise ValueError('value should be between [3, 6]')
+        ret[x] = task_id
 
       elif x == 'label':
         ret[x] = int(input(f'Enter a query label [0, {max_label_val}]: '))
@@ -146,6 +168,9 @@ def save_data(data_tuple, fd):
   print(fd)
   print(f'- orginal size: {len(binary_file) / 1e6} MB')
   print(f'- compressed size: {len(compressed_bin_file) / 1e6} MB')
+  if not os.path.exists("features/"):
+    os.makedirs('features/')
+     
   with open(f'features/{fd}.bin', 'wb') as f: f.write(compressed_bin_file)
 
 def load_data(fd: str) -> Tuple[Any, ...]:
@@ -156,6 +181,10 @@ def load_data(fd: str) -> Tuple[Any, ...]:
   with open(data_fn, 'rb') as f: cmprsd_bin = f.read()
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
+
+def load_semantics(fd: str) -> Tuple[Any, ...]:
+  with open(f'latent_semantics/{fd}', 'rb') as f: data = pickle.load(f)
+  return data
 
 def save_pickle(obj, fn):
   with open(fn, 'wb') as f: pickle.dump(obj, f)
