@@ -1,0 +1,10 @@
+__pycache__
+*.swp
+features
+.DS_Store
+scrap
+HARD_SAMPLES.txt
+data
+models
+latent_semantics
+similarity_matrices
