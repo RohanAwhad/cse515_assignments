@@ -148,19 +148,21 @@ def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_labe
       axes[0].set_xticks([])
       axes[0].set_yticks([])
 
+    ax = axes[1] if img is not None else axes
     img = top_k_imgs[0]
     idx = top_k_ids[0]
     score = top_k_img_scores[0]
 
-    ax = axes[1]
-    ax.set_xlabel(f'Img ID: {idx}\nScore/Distance: {score:0.2f}')
+    if similarity_function == 'manhattan_distance':
+      score = abs(score)
+      ax.set_xlabel(f'Img ID: {idx}\nDistance: {score:6.2f}')
+    else:
+      ax.set_xlabel(f'Img ID: {idx}\nScore: {score:5.2f}')
     if img.mode == 'L': img = img.convert('RGB')
     ax.imshow(img)
     ax.set_xticks([])
     ax.set_yticks([])
-
-    if n_rows == 2: ax.set_ylabel(similarity_function)
-    else: axes[0].set_ylabel(similarity_function)
+    ax.set_ylabel(similarity_function)
 
   else:
     if img is not None:
