@@ -29,7 +29,7 @@ for fd in ('color_moment', 'hog'):
     embd_idx_to_img_id[len(features_list)] = (img_id, label)
     features_list.append(feats)
 
-  helper.save_data((embd_idx_to_img_id, torch.stack(features_list).numpy()), fd)
+  helper.save_data((embd_idx_to_img_id, torch.stack(features_list)), fd)
 
 
 embd_idx_to_img_id = dict()
@@ -45,7 +45,8 @@ for img_id, (img, label) in tqdm(enumerate(config.DATASET), total=len(config.DAT
   ap_list.append(ap)
   fc_list.append(fc)
 
-helper.save_data((embd_idx_to_img_id, torch.stack(l3_list).numpy()), 'resnet_layer3')
-helper.save_data((embd_idx_to_img_id, torch.stack(ap_list).numpy()), 'resnet_avgpool')
-helper.save_data((embd_idx_to_img_id, torch.stack(fc_list).numpy()), 'resnet_fc')
+helper.save_data((embd_idx_to_img_id, torch.stack(l3_list)), 'resnet_layer3')
+helper.save_data((embd_idx_to_img_id, torch.stack(ap_list)), 'resnet_avgpool')
+helper.save_data((embd_idx_to_img_id, torch.stack(fc_list)), 'resnet_fc')
+helper.save_data((embd_idx_to_img_id, torch.stack(fc_list).softmax(-1)), 'resnet_softmax')
 
