@@ -104,11 +104,15 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
       elif x == "n":
         ret[x] = int(input(f'Enter n value'))
         if ret[x] < 0:
-          raise ValueError(f'n value invalid')
+          raise ValueError(f'{ret[x]} is a invalid value for n')
+      elif x == "alpha":
+        ret[x] = float(input(f'Enter alpha value(Random jump probability) between [0,1] to be used for personalized page rank'))
+        if ret[x] < 0 or ret[x] > 1:
+          raise ValueError(f'{ret[x]} is a invalid value for alpha. Alpha is a probablity value and has to lie between [0,1]')
       elif x == "m":
         ret[x] = int(input(f'Enter m value'))
         if ret[x] < 0:
-          raise ValueError(f'm value invalid')
+          raise ValueError(f'{ret[x]} is a invalid value for m')
       elif x == 'dim_red':
         _id = int(input('''Enter id of dimension reductionality algorithm to use:
 
