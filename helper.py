@@ -85,7 +85,7 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
 
 >'''
         ))
-        if not (0 < fd_id < 6): raise ValueError('value should be between [1, 5]')
+        if not (0 < fd_id < 7): raise ValueError('value should be between [1, 6]')
         ret[x] = feature_descriptor_dict[fd_id]
 
       elif x == 'task_id':
