@@ -40,7 +40,7 @@ def main():
   if(inp['task_id']==3):
     inp_2 = helper.get_user_input('dim_red',len(config.DATASET))
     inp['dim_red'] = inp_2['dim_red']
-    latent_space = helper.load_semantics("task" + str(inp['task_id'])+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent']))
+    latent_space = helper.load_semantics("task" + str(inp['task_id'])+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+".pkl")
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
 
 
