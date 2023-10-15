@@ -7,6 +7,7 @@ Changes since Phase 1 Submission:
 import bz2
 import os
 import pickle
+import time
 
 from typing import Dict, Union, Tuple, Any
 
@@ -171,7 +172,11 @@ def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_labe
 
     for i, (img, idx, score) in enumerate(zip(top_k_imgs, top_k_ids, top_k_img_scores)):
       ax = axes[i] if n_rows == 1 else axes[1, i]
-      ax.set_xlabel(f'Img ID: {idx}\nScore/Distance: {score:0.2f}')
+      if similarity_function == 'manhattan_distance':
+        score = abs(score)
+        ax.set_xlabel(f'Img ID: {idx}\nDistance: {score:6.2f}')
+      else:
+        ax.set_xlabel(f'Img ID: {idx}\nScore: {score:5.2f}')
       if img.mode == 'L': img = img.convert('RGB')
       ax.imshow(img)
       ax.set_xticks([])
@@ -183,6 +188,12 @@ def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_labe
   fig.suptitle(row_label)
   plt.tight_layout()
   plt.show()
+
+  # save plots with timestamp
+  os.makedirs('plots/', exist_ok=True)
+  save_fn = f'plots/{int(time.time())}.png'
+  plt.savefig(save_fn)
+  print(f'Plot saved to {save_fn}')
 
 def save_top_k(img, query_img_id, top_k_imgs, top_k_ids, K, fn):
   n_rows = len(top_k_imgs)+1
