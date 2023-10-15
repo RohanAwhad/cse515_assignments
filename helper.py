@@ -104,11 +104,11 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
       elif x == "n":
         ret[x] = int(input(f'Enter n value'))
         if ret[x] < 0:
-          raise ValueError(f'label invalid')
+          raise ValueError(f'n value invalid')
       elif x == "m":
         ret[x] = int(input(f'Enter m value'))
         if ret[x] < 0:
-          raise ValueError(f'label invalid')
+          raise ValueError(f'm value invalid')
       elif x == 'dim_red':
         _id = int(input('''Enter id of dimension reductionality algorithm to use:
 
