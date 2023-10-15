@@ -19,6 +19,7 @@ class FeatureStore:
       'resnet_layer3': 'cosine_similarity',
       'resnet_avgpool': 'cosine_similarity',
       'resnet_fc': 'manhattan_distance',
+      'resnet_softmax': 'kl_divergence',
     }
 
   def __getitem__(self, key: str) -> Dict[str, Tuple[str, Dict[int, Tuple[int, int]], torch.Tensor]]:
