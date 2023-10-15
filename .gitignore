@@ -10,3 +10,5 @@ latent_semantics
 similarity_matrices
 run.sh
 plots
+test.sh
+
