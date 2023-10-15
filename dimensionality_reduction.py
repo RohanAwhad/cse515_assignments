@@ -12,70 +12,58 @@ from sklearn.decomposition import non_negative_factorization as NNMF
 from tqdm import tqdm
 from typing import Tuple
 
-def svd_custom(A: torch.Tensor, K: int) -> Tuple[torch.Tensor, torch.Tensor]:
+def svd_custom(A: torch.Tensor, K: int) -> torch.Tensor:
   # TODO (rohan): sometimes the eigen vectors are flipped, need to fix that
-  if DEBUG: print('computing eigen values and vectors...')
-  eigen_values1, U = map(torch.tensor, np.linalg.eig(A @ A.T))
+  # Only in DEBUG mode calculate U * Sigma
+  if DEBUG:
+    print('computing eigen values and vectors...')
+    eigen_values1, U = map(torch.tensor, np.linalg.eig(A @ A.T))
+
   eigen_values2, V = map(torch.tensor, np.linalg.eig(A.T @ A))
 
-  # select only top k eigen values
-  eigen_values1, U = eigen_values1[:K], U[:, :K]
-  eigen_values2, V = eigen_values2[:K], V[:, :K]
-
   # sort eigen values in descending order along with U and V
-  if DEBUG: print('sorting eigen values and vectors...')
-  tmp_1, u_tmp = [], []
-  for ev, u in sorted(zip(eigen_values1, U.T), key=lambda x: x[0], reverse=True):
-    tmp_1.append(ev)
-    u_tmp.append(u)
-  eigen_values1, U = torch.tensor(tmp_1), torch.stack(u_tmp).T
+  if DEBUG:
+    print('sorting eigen values and vectors...')
+    tmp_1, u_tmp = [], []
+    for ev, u in sorted(zip(eigen_values1, U.T), key=lambda x: x[0], reverse=True):
+      tmp_1.append(ev)
+      u_tmp.append(u)
+    eigen_values1, U = torch.tensor(tmp_1), torch.stack(u_tmp).T
 
   tmp_2, v_tmp = [], []
   for ev, v in sorted(zip(eigen_values2, V.T), key=lambda x: x[0], reverse=True):
     tmp_2.append(ev)
     v_tmp.append(v)
   eigen_values2, V = torch.tensor(tmp_2), torch.stack(v_tmp).T
+  eigen_values2, V = eigen_values2[:K], V[:, :K]
 
-  Sigma = eigen_values1.pow(0.5)
   if DEBUG:
+    eigen_values1, U = eigen_values1[:K], U[:, :K]
+    Sigma = eigen_values1.pow(0.5)
     print("Sigma: ", Sigma)
     print("U    : ", U)
     print("V    : ", V)
 
-  return (U * Sigma, V.T)
+    print("Feat DB @ V: ", A @ V)
+    print("U * Sigma  : ", U * Sigma)
 
-  
+    return (U * Sigma, V.T)
 
-  
+  return V.T
 
-class nnmf_custom: 
-    def __init__(self, n_components: int) -> None:
-        self.components_ = None
-        self.n_components = n_components
-        self.reconstruction_error_ = None
-   
-    def fit_transform(self, X, n_components):
-        W, H, reconstruction_error = nnmf_custom(X, n_components)
-        self.components_ = H.T
-        self.reconstruction_error_ = reconstruction_error
-        return W
 
-    def transform(self, X):
-        return np.dot(X, self.components_)
+def nnmf_custom(X, K, max_iter=1000, tol=1e-4):
+  # create torch random tensors for W and H
+  W = torch.rand((X.shape[0], K))
+  H = torch.rand((K, X.shape[1]))
 
-def nnmf_custom(X, K, max_iter=1000):
-    W = np.random.rand(X.shape[0], K)
-    H = np.random.rand(K, X.shape[1])
+  for i in range(max_iter):
+    W = W * (X @ H.T) / (W @ H @ H.T + 1e-10)
+    H = H * (W.T @ X) / (W.T @ W @ H + 1e-10)
 
-    for i in range(max_iter):
-        # Update H
-        
-        H *= (np.asarray(W.T) @ np.asarray(X)) / (np.asarray(W.T) @ np.asarray(W) @ np.asarray(H) + 1e-10)
+    if np.linalg.norm(X - W @ H) < tol: break
 
-        # Update W
-        W *= (np.asarray(X) @ np.asarray(H.T)) / (np.asarray(W) @ np.asarray(H) @ np.asarray(H.T) + 1e-10)
-
-    return W, H, None
+  return W, H
 
 def recaliberate_centroids(cluster_idx, K, X):
     _, n = np.shape(X)
@@ -103,16 +91,12 @@ def Kmeans(K, X, max_iterations=500):
             return centroids, clusters 
     return centroids, clusters
 
-def reduce_(feat_db, K, dim_red):
+
+def reduce_(feat_db: torch.Tensor, K: int, dim_red: str):
 
   if dim_red == 'svd':
-    '''
-    model = SVD(n_components=K)
-    weight_mat = model.fit_transform(feat_db)
-    components = model.components_
-    '''
-    #using custom SVD
-    weight_mat, components = svd_custom(feat_db, K)
+    components = svd_custom(feat_db, K)
+    weight_mat = feat_db @ components.T
     
   elif dim_red == 'nnmf_custom':
     W, H, _ = nnmf_custom(abs(feat_db), K)
@@ -124,7 +108,8 @@ def reduce_(feat_db, K, dim_red):
     components = model.components_
 
   elif dim_red == 'nnmf':
-    weight_mat, components, _ = NNMF(abs(feat_db), n_components=K)
+    #weight_mat, components, _ = NNMF(abs(feat_db), n_components=K)
+    weight_mat, components = nnmf_custom(abs(feat_db), K=K, max_iter=200)
 
   elif dim_red == 'kmeans':
     components, *_ = Kmeans(K, feat_db.numpy())
