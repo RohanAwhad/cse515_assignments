@@ -46,6 +46,7 @@ if not (RESNET_FC_FEATS is None or isinstance(RESNET_FC_FEATS, torch.Tensor)): R
 
 # ---
 SIMILARITY_METRIC = 0
+# (img_id, label)
 IDX = 1
 FEAT_DB = 2
 
@@ -65,3 +66,6 @@ LATENT_SEMANTICS_MODES_FN = 'latent_semantics/task{task}_{feat_space}_{dim_red}_
 SIMI_MAT_DIR = 'similarity_matrices'
 os.makedirs(SIMI_MAT_DIR, exist_ok=True)
 SIMI_MAT_FN = SIMI_MAT_DIR + '/{feat_space}_{mat1}_{mat2}_mat.pkl'
+GRAPH_DIR = 'persisted_graphs'
+os.makedirs(GRAPH_DIR, exist_ok=True)
+NEW_GRAPH_PATH = GRAPH_DIR + '/{feat_space}_{n}.gpickle'
