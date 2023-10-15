@@ -46,6 +46,17 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
       if x == 'K':
         ret[x] = int(input('Input K for top-k: '))
         if ret[x] == 0: raise ValueError(f'K needs to be greater than 0. Given: {ret[x]}')
+      elif x == 'LORF':
+        #ret[x] = input('Do you want to use Latent Semantics or Complete Feature Model').lower()
+        lorF = int(input('''Do you want to use Latent Semantics or Complete Feature Model ?
+
+1: Latent Semantics
+2: Complete Feature Models
+
+>'''
+        ))
+        if not (0 < lorF < 3): raise ValueError('value should be 1 or 2')
+        ret[x] = lorF
       
       elif x == 'K_latent':
         ret[x] = int(input('Input K for latent space: '))
@@ -90,6 +101,14 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
         ret[x] = int(input(f'Enter a query label [0, {max_label_val}]: '))
         if ret[x] < 0 or ret[x] > max_label_val:
           raise ValueError(f'label invalid. should be between [0, {max_label_val}], try again. you got it!')
+      elif x == "n":
+        ret[x] = int(input(f'Enter n value'))
+        if ret[x] < 0:
+          raise ValueError(f'label invalid')
+      elif x == "m":
+        ret[x] = int(input(f'Enter m value'))
+        if ret[x] < 0:
+          raise ValueError(f'label invalid')
       elif x == 'dim_red':
         _id = int(input('''Enter id of dimension reductionality algorithm to use:
 
