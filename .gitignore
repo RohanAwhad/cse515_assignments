@@ -9,3 +9,4 @@ models
 latent_semantics
 similarity_matrices
 run.sh
+plots
