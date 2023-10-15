@@ -65,7 +65,6 @@ def main():
         if img.mode != 'RGB': img = img.convert('RGB')
         # Personalized Page Rank, focus on the label. If label is matched give 1 in the teleportation vector. Otherwise leave it to zero
         if inp['label'] == feat_idx[id][1]:
-            label_counter += 1
             if not query_image:
                 query_image = (img, feat_idx[id][0])
             p[id] = 1
