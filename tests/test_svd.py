@@ -1,7 +1,8 @@
-from dimensionality_reduction import svd_custom, nnmf_custom
+from dimensionality_reduction import svd_custom, nnmf_custom, kmeans_custom
 import torch
 from numpy.linalg import svd
 from sklearn.decomposition import NMF
+from sklearn.cluster import KMeans
 
 import numpy as np
 np.set_printoptions(precision=3, suppress=True)
@@ -45,3 +46,24 @@ def test_nnmf_custom():
   print("H: ", H_custom.numpy())
 
   assert False
+
+def test_kmeans_custom():
+  mat = torch.randn(5, 7)
+  model = KMeans(n_clusters=2, random_state=0)
+  model.fit(mat)
+  centroids = model.cluster_centers_
+
+  actual_centroids = kmeans_custom(mat, 2, max_iter=200)
+
+  print()
+  print("Expected")
+  print("Centroids: ", centroids)
+
+  print()
+  print("Actual")
+  print("Centroids: ", actual_centroids.numpy())
+
+  assert False
+
+
+

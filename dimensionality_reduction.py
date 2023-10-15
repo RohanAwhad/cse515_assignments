@@ -1,8 +1,9 @@
 from config import DEBUG
 from similarity_metrics import get_similarity
 
-import torch
 import numpy as np
+import random
+import torch
 
 from hottbox.core import Tensor, TensorTKD
 from hottbox.algorithms.decomposition import CPD
@@ -47,8 +48,6 @@ def svd_custom(A: torch.Tensor, K: int) -> torch.Tensor:
     print("Feat DB @ V: ", A @ V)
     print("U * Sigma  : ", U * Sigma)
 
-    return (U * Sigma, V.T)
-
   return V.T
 
 
@@ -57,39 +56,35 @@ def nnmf_custom(X, K, max_iter=1000, tol=1e-4):
   W = torch.rand((X.shape[0], K))
   H = torch.rand((K, X.shape[1]))
 
-  for i in range(max_iter):
+  for i in tqdm(range(max_iter), desc='NNMF', leave=False):
     W = W * (X @ H.T) / (W @ H @ H.T + 1e-10)
     H = H * (W.T @ X) / (W.T @ W @ H + 1e-10)
-
     if np.linalg.norm(X - W @ H) < tol: break
 
   return W, H
 
-def recaliberate_centroids(cluster_idx, K, X):
-    _, n = np.shape(X)
-    centroids = np.empty((K, n))
-    for i in range(K):
-        points = X[cluster_idx == i] 
-        centroids[i] = np.mean(points, axis=0) 
-    return centroids
 
-def Kmeans(K, X, max_iterations=500):
-    m, n = np.shape(X)
-    centroids = np.empty((K, n))
-    for i in range(K):
-        centroids[i] =  X[np.random.choice(range(m))] 
-    for _ in tqdm(range(max_iterations)):
-        clusters = np.empty(m)
-        for i in range(m):
-            distances = np.empty(K)
-            for j in range(K):
-                distances[j] = np.sqrt(np.sum((centroids[j] - X[i])**2))
-            clusters[i] =  np.argmin(distances)
-        tmp_centroids = centroids                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-        centroids = recaliberate_centroids(clusters, K, X)
-        if not (tmp_centroids - centroids).any():
-            return centroids, clusters 
-    return centroids, clusters
+def kmeans_custom(X, K, max_iter=500):
+  # Initialize centroids randomly
+  centroids = X[random.sample(range(len(X)), K)]
+
+  for _ in tqdm(range(max_iter), desc='KMeans', leave=False):
+    distances = torch.cdist(X, centroids)
+    labels = torch.argmin(distances, dim=1)
+
+    # Update centroids by computing the mean of all data points in each cluster
+    new_centroids = torch.stack([X[labels == k].mean(dim=0) for k in range(K)])
+
+    # Check for convergence
+    if torch.equal(centroids, new_centroids): break
+    centroids = new_centroids
+
+  if DEBUG:
+    print("KMeans components: ", centroids)
+    print("KMeans weight_mat: ", torch.cdist(X, centroids))
+
+  return centroids
+
 
 
 def reduce_(feat_db: torch.Tensor, K: int, dim_red: str):
@@ -98,24 +93,17 @@ def reduce_(feat_db: torch.Tensor, K: int, dim_red: str):
     components = svd_custom(feat_db, K)
     weight_mat = feat_db @ components.T
     
-  elif dim_red == 'nnmf_custom':
-    W, H, _ = nnmf_custom(abs(feat_db), K)
-    weight_mat, components = W, H
-    
   elif dim_red == 'lda':
     model = LDA(n_components=K)
-    weight_mat = model.fit_transform(feat_db)
+    weight_mat = model.fit_transform(feat_db.abs())
     components = model.components_
 
   elif dim_red == 'nnmf':
-    #weight_mat, components, _ = NNMF(abs(feat_db), n_components=K)
-    weight_mat, components = nnmf_custom(abs(feat_db), K=K, max_iter=200)
+    weight_mat, components = nnmf_custom(abs(feat_db), K, max_iter=200)
 
   elif dim_red == 'kmeans':
-    components, *_ = Kmeans(K, feat_db.numpy())
-    components = torch.tensor(components)
-    #weight_mat = get_similarity(components, feat_db, "euclidean_distance")
-    raise NotImplementedError('for kmeans haven\'t yet calculated weight matrix')
+    components = kmeans_custom(feat_db, K)
+    weight_mat = torch.cdist(feat_db, components)
   
   elif dim_red == 'cp':
     # print("Shape", feat_db.numpy().shape)
