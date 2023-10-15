@@ -44,6 +44,10 @@ def get_similarity(query_vec: torch.Tensor, db_mat: torch.Tensor, similarity_met
     if len(query_vec.shape) < 2: query_vec = query_vec.unsqueeze(0)
     ret = -1 * torch.abs(query_vec - db_mat).sum(-1)  # multiply by -1 for retrieving top k functionality
 
+  elif similarity_metric == 'kl_divergence':
+    if len(query_vec.shape) < 2: query_vec = query_vec.unsqueeze(0)
+    ret = -1 * (query_vec * (query_vec / db_mat).log()).sum(-1)  # returns 1D tensor
+
   else:
     raise NotImplementedError(f'{similarity_metric} algorithm not implemented')
 
@@ -71,17 +75,6 @@ def get_similarity_mat_x_mat(mat1: torch.Tensor, mat2: torch.Tensor, similarity_
 
   elif similarity_metric == 'pearson_coefficient':
     return torch.cat((mat1, mat2), dim=0).corrcoef()[:len(mat1), len(mat1):]
-
-  '''
-  # below approach is slow
-  _tmp = []
-  #for row in tqdm(mat1, desc='Calculating similarity'):
-  for row in mat1:
-    _tmp.append(get_similarity(row, mat2, similarity_metric)) 
-    if DEBUG>1: print(f'len of sim score matrix: {len(_tmp):5d}\t\t\
-size : {sys.getsizeof(_tmp[0].storage()) * len(_tmp) / 1e9 :10.2f} GB')
-  return torch.stack(_tmp)
-  '''
 
   # implementing multithreading
   def thread_func(row, mat2, similarity_metric, ret, tid):

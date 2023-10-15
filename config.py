@@ -66,6 +66,7 @@ from feature_descriptor import FeatureStore
 # TODO (rohan): update var name
 #feature_store = FeatureStore(helper.load_data)
 FEAT_DESC_FUNCS = FeatureStore(helper.load_data)
+DISTANCE_MEASURES = ['manhattan_distance', 'kl_divergence']
 
 FEATURES_DIR = 'features'
 os.makedirs(FEATURES_DIR, exist_ok=True)

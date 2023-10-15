@@ -39,7 +39,7 @@ def retrieve(img_id, feat_space, K):
   #if not isinstance(query_feat, torch.Tensor): query_feat = torch.tensor(query_feat)  # TODO (rohan): make torch universal and remove dependency on numpy
   similarity_scores = get_similarity(query_feat, feat_db, similarity_metric)
   top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, feat_db_idx, K)
-  if similarity_metric == 'manhattan_distance': top_k_scores = list(map(abs, top_k_scores))
+  if similarity_metric in config.DISTANCE_MEASURES: top_k_scores = list(map(abs, top_k_scores))
 
   # print output
   print('-'*50)

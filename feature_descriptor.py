@@ -57,6 +57,7 @@ class FeatureDescriptor:
     elif descriptor == 'resnet_layer3': return self.extract_resnet_features(img)[0]
     elif descriptor == 'resnet_avgpool': return self.extract_resnet_features(img)[1]
     elif descriptor == 'resnet_fc': return self.extract_resnet_features(img)[2]
+    elif descriptor == 'resnet_softmax': return (self.extract_resnet_features(img)[2]).softmax(-1)
     else: raise ValueError(f'{descriptor} is either not a valid descriptor or not implemented')
 
 
