@@ -24,7 +24,7 @@ class FeatureStore:
   def __getitem__(self, key: str) -> Dict[str, Tuple[str, Dict[int, Tuple[int, int]], torch.Tensor]]:
     if key not in self.features:
       # load features from disk
-      idx, feats = helper.load_data(key)
+      idx, feats = self.load_data(key)
       if isinstance(feats, np.ndarray): feats = torch.from_numpy(feats)
       self.features[key] = (self.similarity_measures[key], idx, feats)
 
