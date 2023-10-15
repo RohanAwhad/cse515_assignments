@@ -27,6 +27,7 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
     3: 'resnet_layer3',
     4: 'resnet_avgpool',
     5: 'resnet_fc',
+    6: 'resnet_softmax',
   }
   dim_red_dict: Dict[int, str] = {
     1: 'svd',
@@ -80,6 +81,7 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
 3: resnet_layer3
 4: resnet_avgpool
 5: resnet_fc
+6: resnet_softmax
 
 >'''
         ))
@@ -92,7 +94,7 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
 3: LS1
 4: LS2
 5: LS3
-6: LS4  
+6: LS4
 >'''
         ))
         if not (3 <= task_id <= 6): raise ValueError('value should be between [3, 6]')
@@ -103,15 +105,15 @@ def get_user_input(inp: str, len_ds: int=0, max_label_val: int=0) -> Dict[str, U
         if ret[x] < 0 or ret[x] > max_label_val:
           raise ValueError(f'label invalid. should be between [0, {max_label_val}], try again. you got it!')
       elif x == "n":
-        ret[x] = int(input(f'Enter n value'))
+        ret[x] = int(input(f'Enter value for n: '))
         if ret[x] < 0:
           raise ValueError(f'{ret[x]} is a invalid value for n')
       elif x == "alpha":
-        ret[x] = float(input(f'Enter alpha value(Random jump probability) between [0,1] to be used for personalized page rank'))
+        ret[x] = float(input(f'Enter value for alpha: '))
         if ret[x] < 0 or ret[x] > 1:
           raise ValueError(f'{ret[x]} is a invalid value for alpha. Alpha is a probablity value and has to lie between [0,1]')
       elif x == "m":
-        ret[x] = int(input(f'Enter m value'))
+        ret[x] = int(input(f'Enter value for m: '))
         if ret[x] < 0:
           raise ValueError(f'{ret[x]} is a invalid value for m')
       elif x == 'dim_red':
