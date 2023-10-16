@@ -12,10 +12,10 @@ import time
 from typing import Dict, Union, Tuple, Any
 
 # 3rd-party libs
+import functools
 import matplotlib.pyplot as plt
-
-from PIL import Image
 import os
+from PIL import Image
 
 def load_img_file(fn):
   return Image.open(fn)
@@ -191,13 +191,15 @@ def plot(img, query_img_id, top_k_imgs, top_k_ids, top_k_img_scores, K, row_labe
 
   fig.suptitle(row_label)
   plt.tight_layout()
-  plt.show()
 
   # save plots with timestamp
   os.makedirs('plots/', exist_ok=True)
   save_fn = f'plots/{int(time.time())}.png'
   plt.savefig(save_fn)
   print(f'Plot saved to {save_fn}')
+
+  plt.show()
+
 
 def save_top_k(img, query_img_id, top_k_imgs, top_k_ids, K, fn):
   n_rows = len(top_k_imgs)+1
@@ -235,6 +237,7 @@ def save_data(data_tuple, fd):
      
   with open(f'features/{fd}.bin', 'wb') as f: f.write(compressed_bin_file)
 
+@functools.lru_cache()
 def load_data(fd: str) -> Tuple[Any, ...]:
   data_fn = f'features/{fd}.bin'
   if not os.path.exists(data_fn):
@@ -244,8 +247,13 @@ def load_data(fd: str) -> Tuple[Any, ...]:
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
 
+@functools.lru_cache()
+def load_semantics(fn):
+  return load_pickle('latent_semantics/' + fn)
+
 def save_pickle(obj, fn):
   with open(fn, 'wb') as f: pickle.dump(obj, f)
 
+@functools.lru_cache()
 def load_pickle(fn):
   with open(fn, 'rb') as f: return pickle.load(f)

@@ -57,3 +57,7 @@ LATENT_SEMANTICS_MODES_FN = LATENT_SEMANTICS_DIR + '/task{task}_{feat_space}_{di
 SIMI_MAT_DIR = 'similarity_matrices'
 os.makedirs(SIMI_MAT_DIR, exist_ok=True)
 SIMI_MAT_FN = SIMI_MAT_DIR + '/{feat_space}_{mat1}_{mat2}_mat.pkl'
+
+GRAPH_DIR = 'persisted_graphs'
+os.makedirs(GRAPH_DIR, exist_ok=True)
+NEW_GRAPH_PATH = GRAPH_DIR + '/{feat_space}_{n}.gpickle'
