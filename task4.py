@@ -8,24 +8,21 @@ from config import DEBUG
 import torch
 import numpy as np
 
-def print_img_id_weight_pairs(weight_mat):
-  for j in range(weight_mat.shape[1]):
+def print_label_weight_pairs(weight_mat):
+  for i, row in enumerate(weight_mat.T):
     print()
-    print(f'Latent feature : {j}')
-    enum_arr = list(enumerate(weight_mat[:,j]))
-    sorted_arr = sorted(enum_arr, key=lambda x: x[1], reverse=True)
-    for index, value in sorted_arr:
-        print(f' - Label: {index:4d}\tWeight := {value:10.6f}')
+    print(f'Latent Feat: {i:3d}')
+    row = [(x, j) for j, x in enumerate(row)]
+    row = sorted(row, key=lambda x: x[0], reverse=True)
+    for x, j in row:
+      print(f' - Label {j:3d}\t\tWeight := {x:10.6f}')
 
   print('='*53)
 
 def create_tensor(weight_mat, idx_dict):
-  #Discuss other ways
-  tensor = torch.zeros(weight_mat.shape[0],weight_mat.shape[1],max(config.DATASET.y) + 1)
-  for i, row in enumerate(weight_mat):
-    # print()
-    label = idx_dict[i][1]
-    tensor[i,:,label] = row
+  m, n = weight_mat.shape
+  tensor = torch.zeros(m, n, max(config.DATASET.y) + 1)
+  for i, row in enumerate(weight_mat): tensor[i, :, idx_dict[i][1]] = row
   return tensor
 
 
@@ -38,13 +35,12 @@ def main():
   tensor = create_tensor(feat_db, idx_dict)
 
   if DEBUG: print(f'Created tensor of shape {tensor.shape}')
-  W,_ = dimensionality_reduction.reduce_(tensor, inp['K'], 'cp')
+  W, _ = dimensionality_reduction.reduce_(tensor, inp['K'], 'cp')
 
-  for j,i in enumerate(['image','feature','label']):
-    inp['mode'] = i
-    helper.save_pickle(np.transpose(W[j]), config.LATENT_SEMANTICS_MODES_FN.format(task=4, **inp))
+  for j, i in enumerate(['image','feature','label']):
+    helper.save_pickle(np.transpose(W[j]), config.LATENT_SEMANTICS_MODES_FN.format(task=4, mode=i, **inp))
 
-  print_img_id_weight_pairs(W[2])
+  print_label_weight_pairs(W[2])
 
 
 if __name__ == '__main__':
