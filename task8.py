@@ -68,11 +68,12 @@ def main():
     feat_db_labels = get_similarity_mat_x_mat(feat_db_labels, feat_db, similarity_metric)
     
 
+  # TODO (rohan): handle transformation specifically for Kmeans
   train_latent_space = np.dot(feat_db_labels, np.transpose(latent_space))
   train_latent_space = torch.tensor(train_latent_space)
   query_latent_space = np.dot(query_feat, np.transpose(latent_space))
   query_latent_space = torch.tensor(query_latent_space)
-  similarity_scores = get_similarity(query_latent_space, train_latent_space, similarity_metric)
+  similarity_scores = get_similarity(query_latent_space, train_latent_space, 'cosine_similarity')
   top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, idx_dict, inp['K'])
 
   #if similarity_metric in config.DISTANCE_MEASURES: top_k_scores = list(map(abs, top_k_scores))
