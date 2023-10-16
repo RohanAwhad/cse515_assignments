@@ -40,31 +40,53 @@ def main():
   if(inp['task_id']==3):
     inp_2 = helper.get_user_input('dim_red',len(config.DATASET))
     inp['dim_red'] = inp_2['dim_red']
-    latent_space = helper.load_semantics("task" + str(inp['task_id'])+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+".pkl")
+    latent_space = helper.load_pickle(config.LATENT_SEMANTICS_FN.format(
+      task=inp['task_id'],
+      feat_space=inp['feat_space'],
+      dim_red=inp['dim_red'],
+      K=inp['K_latent']
+    ))
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
 
 
   elif(inp['task_id']==4):
     inp['dim_red']="cp"
-    latent_space = helper.load_semantics("task" + str(inp['task_id'])+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+"_feature.pkl")
+    latent_space = helper.load_pickle(config.LATENT_SEMANTICS_FN.format(
+      task=inp['task_id'],
+      feat_space=inp['feat_space'],
+      dim_red=inp['dim_red'],
+      K=inp['K_latent'],
+      mode='feature'
+    ))
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
     
 
   elif(inp['task_id']==5):
     inp_2 = helper.get_user_input('dim_red',len(config.DATASET))
     inp['dim_red'] = inp_2['dim_red']
-    latent_space = helper.load_semantics("task" + str(inp['task_id']) + "_label_label_simi_mat"+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+".pkl")
+    latent_space = helper.load_pickle(config.LATENT_SEMANTICS_FN.format(
+      task=inp['task_id'],
+      feat_space='label_label_simi_mat_' + inp['feat_space'],
+      dim_red=inp['dim_red'],
+      K=inp['K_latent']
+    ))
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
     query_feat = get_similarity(query_feat, feat_db_labels, similarity_metric)
     feat_db_labels = get_similarity_mat_x_mat(feat_db_labels, feat_db_labels, similarity_metric)
 
   elif(inp['task_id']==6):
+    # (TODO): Errors for this task
     
     inp_2 = helper.get_user_input('dim_red',len(config.DATASET))
     inp['dim_red'] = inp_2['dim_red']
-    latent_space = helper.load_semantics("task" + str(inp['task_id']) + "_img_img_simi_mat"+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+".pkl")
+    latent_space = helper.load_pickle(config.LATENT_SEMANTICS_FN.format(
+      task=inp['task_id'],
+      feat_space='img_img_simi_mat_' + inp['feat_space'],
+      dim_red=inp['dim_red'],
+      K=inp['K_latent']
+    ))
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
-    query_feat = get_similarity_mat_x_mat(query_feat.unsqueeze(0), feat_db, similarity_metric)
+    query_feat = get_similarity(query_feat, feat_db, similarity_metric)
     feat_db_labels = get_similarity_mat_x_mat(feat_db_labels, feat_db, similarity_metric)
     
 

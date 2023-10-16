@@ -244,10 +244,6 @@ def load_data(fd: str) -> Tuple[Any, ...]:
   bin_data = bz2.decompress(cmprsd_bin)
   return pickle.loads(bin_data)
 
-def load_semantics(fd: str) -> Tuple[Any, ...]:
-  with open(f'latent_semantics/{fd}', 'rb') as f: data = pickle.load(f)
-  return data
-
 def save_pickle(obj, fn):
   with open(fn, 'wb') as f: pickle.dump(obj, f)
 
