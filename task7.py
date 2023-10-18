@@ -40,7 +40,7 @@ def main():
     label_feat_sp = get_label_vecs(inp['feat_space']) #num_labelsX#num_features
     latent_space = helper.load_semantics("task" + str(inp['task_id']) + "_label_label_simi_mat"+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+".pkl")
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
-    query_feat = get_similarity_mat_x_mat(query_feat.unsqueeze(0), label_feat_sp, similarity_metric)
+    query_feat = get_similarity(query_feat, label_feat_sp, similarity_metric)
     feat_db = get_similarity_mat_x_mat(feat_db, label_feat_sp, similarity_metric)
     
 
@@ -49,7 +49,7 @@ def main():
     inp['dim_red'] = inp_2['dim_red']
     latent_space = helper.load_semantics("task" + str(inp['task_id']) + "_img_img_simi_mat"+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp['K_latent'])+".pkl")
     query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
-    query_feat = get_similarity_mat_x_mat(query_feat.unsqueeze(0), feat_db, similarity_metric)
+    query_feat = get_similarity(query_feat, feat_db, similarity_metric)
     feat_db = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
     
 
