@@ -1,29 +1,30 @@
-#!python3
-
 import config
 import helper
-from feature_descriptor import FeatureDescriptor
-import numpy as np
-import networkx as nx
-import pickle
-from tqdm import tqdm
-import torch
-import os
+
+from config import FEAT_DESC_FUNCS
+from similarity_metrics import get_similarity_mat_x_mat
+
+from task5 import get_label_vecs
 from task6 import get_img_img_similarity_matrix
 
-from similarity_metrics import get_similarity, get_similarity_mat_x_mat, get_top_k_ids_n_scores
-from task5 import get_label_vecs
+import torch
 
+
+'''
+feat_space = 'resnet_softmax'
+n = 10
+m = 5
+label = 100
+'''
 
 def main():
-    feature_descriptor = FeatureDescriptor(config.RESNET_MODEL)
     inp = helper.get_user_input('LORF,feat_space,n,m,label,alpha',len(config.DATASET), len(set(config.DATASET.y)))
     _tmp = config.FEAT_DESC_FUNCS[inp['feat_space']]
-    
+
     feat_idx = _tmp[config.IDX]
-    similarity_metric = _tmp[config.SIMILARITY_METRIC]
 
     if inp['LORF'] == 1:
+        similarity_metric = _tmp[config.SIMILARITY_METRIC]
         feat_temp = _tmp[config.FEAT_DB]
         inp_LS = helper.get_user_input('task_id,K_latent',len(config.DATASET), len(set(config.DATASET.y)))
         if(inp_LS['task_id']==3):
@@ -48,87 +49,122 @@ def main():
             latent_space = helper.load_semantics("task" + str(inp_LS['task_id']) + "_img_img_simi_mat"+ "_" + inp['feat_space']+"_"+inp['dim_red']+"_"+str(inp_LS['K_latent'])+".pkl")
             feat_temp = get_similarity_mat_x_mat(feat_temp, feat_temp, similarity_metric)
         
-        feat_db = np.dot(feat_temp, np.transpose(latent_space))
-        feat_db = torch.tensor(feat_db)
+        feat_db = feat_temp @ latent_space.T
+        similarity_metric = 'cosine_similarity'  # TODO (rohan): should be based on the dimension reductionality method
+        feat_similarity_scores = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
+
     else:
-        feat_db = _tmp[config.FEAT_DB]
-        img_img_similarity_mat = get_img_img_similarity_matrix(inp['feat_space'])
-        edge_list = []
-    
-    # Create Similarity Graph, for each image calculate n most similar images.
-    G = nx.Graph()
-    p = np.repeat(0, len(feat_idx))
-    query_image = None
-    # For each image id, create a new node and create edges with its top n images. 
-    for id in tqdm(feat_idx):
-        img = config.DATASET[feat_idx[id][0]][0]
-        if img.mode != 'RGB': img = img.convert('RGB')
-        # Personalized Page Rank, focus on the label. If label is matched give 1 in the teleportation vector. Otherwise leave it to zero
-        if inp['label'] == feat_idx[id][1]:
-            if not query_image:
-                query_image = (img, feat_idx[id][0])
-            p[id] = 1
+        similarity_metric = _tmp[config.SIMILARITY_METRIC]
+        feat_similarity_scores = get_img_img_similarity_matrix(inp['feat_space'])
 
-        if inp['LORF'] == 1:
-            # Extract image features
-            query_feat = feature_descriptor.extract_features(img, inp['feat_space'])
-            if inp_LS['task_id']==5 or inp_LS['task_id']==6:
-                query_feat = get_similarity_mat_x_mat(query_feat.unsqueeze(0), feat_db, similarity_metric)
-            query_feat = np.dot(query_feat, np.transpose(latent_space))
-            query_feat = torch.tensor(query_feat)
-            # Get similarity scores of the current image with all other images.
-            # Find top n images.
-            similarity_scores = get_similarity(query_feat, feat_db, similarity_metric)
-            top_n_ids, top_n_scores = get_top_k_ids_n_scores(similarity_scores, feat_idx, inp['n'])
-            for top_id in top_n_ids:
-                # Add an edge with top n images.
-                G.add_edge(feat_idx[id][0], top_id)
-        else:
-            similarity_scores = img_img_similarity_mat[id]
-            top_n_ids, top_n_scores = get_top_k_ids_n_scores(similarity_scores, feat_idx, inp['n'])
-            for top_id in top_n_ids:
-                edge_list.append((feat_idx[id][0], top_id))
-    graph_path = config.NEW_GRAPH_PATH.format(feat_space=inp['feat_space'], n=inp['n'])
-    if inp['LORF'] == 2:
-        if os.path.exists(graph_path): 
-            print(f'Loading {graph_path} graph')
-            G = helper.load_pickle(graph_path)
-        else: 
-            G=nx.from_edgelist(edge_list)
-            # Persist the graph so that it can be loaded back if needed.
-            print(f'Saving graph as {graph_path}')
-            helper.save_pickle(G, graph_path)
-    
-    print('graph is ready')
-    alpha = inp['alpha']
-    # Calculate page rank measure.
-    def google_matrix(G, p, alpha=0.85):
-        # Adjacency matrix
-        M = np.asmatrix(nx.to_numpy_array(G))
-        N = len(G)
-        if N == 0:
-            return M
-        # Transition matrix
-        M /= M.sum(axis=1) 
-        return alpha * M + (1 - alpha) * p
-    # Normalize teliportation vector based on seed set
-    p = p / np.count_nonzero(p == 1)
-    M = google_matrix(G, p, alpha)
-    # Find eigen values and eigenvectors
-    eigenvalues, eigenvectors = np.linalg.eig(M.T)
-    ind = np.argmax(eigenvalues)
-    largest = np.array(eigenvectors[:, ind]).flatten().real
-    norm = float(largest.sum())
-    largest = largest / norm
-    ranks_ev = dict(zip(G, map(float, largest / norm)))
-    top_m_ids = sorted(ranks_ev, key=ranks_ev.get, reverse=True)[:inp['m']]
-    top_m_scores = [ranks_ev[x] for x in top_m_ids]
+    # Task 1:
+    # – creates a similarity graph, G(V, E), where V corresponds to the images in the database and E contains node pairs vi , vj such that, for each subject vi , vj is one of the n most similar images in the database in the given space
+
+    # Use config and load image_feature matrix for featuer space 'resnet_softmax'
+    # Calculate similarity matrix using img-img similarity matrix function from task6
+    # Argsort for each row and get top n indices
+    # Create an adjacency matrix with 1s for top n indices and 0s for rest for each image
+
+    # Task 2:
+    # - identifies the most significant m images (relative to the given label l) using personalized PageRank measure.
+
+    # Create an array of len(nodes)
+    # Set all to 0
+    # Set images belonging to label l to 1
+    # Calculate personalized page rank for each image
+    # Sort and get top m images
+
+    if similarity_metric in config.DISTANCE_MEASURES:
+        _, similar_img_ids = torch.topk(-1*(feat_similarity_scores), inp['n'])
+    else:
+        _, similar_img_ids = torch.topk((feat_similarity_scores), inp['n'])
+
+    print(similarity_metric)
+    print(similar_img_ids[0])
+    print(feat_similarity_scores[0][similar_img_ids[0]])
+    print(similar_img_ids.shape)
+
+    # create adjacency matrix
+
+    adj_mat = torch.zeros((len(similar_img_ids), len(similar_img_ids)))
+    for i in range(len(similar_img_ids)):
+        adj_mat[i][similar_img_ids[i]] = 1
+    print(adj_mat[0].sum())
+
+    # Task 2
+
+    personalization = torch.zeros((len(similar_img_ids)))
+    # for images belonging to label l, set personalization to 1
+    # _tmp[config.IDX] is idx to (img_id, label)
+    # I want a label to list of idx
+    query_img = None
+    ids_to_set_to_1 = []
+    idx_dict = _tmp[config.IDX]
+    for x, (img_id, img_l) in idx_dict.items():
+        if img_l == inp['label']:
+            ids_to_set_to_1.append(x)
+            if query_img is None:
+                query_img = (config.DATASET[img_id][0], img_l)
+
+    personalization[ids_to_set_to_1] = 1
+    # convert it to probability distribution
+    personalization = personalization / personalization.sum()
+
+    print(personalization.sum())
+
+    def compute_transition_matrix(adj_matrix):
+        row_sum = torch.sum(adj_matrix, dim=1, keepdim=True)
+        return adj_matrix / row_sum
+
+    def personalized_page_rank(adj_matrix, personalization, alpha=0.85, max_iter=100, tol=1e-6):
+        # Get the transition matrix
+        M = compute_transition_matrix(adj_matrix)
+        
+        # Number of nodes
+        N = adj_matrix.shape[0]
+        
+        # Initialize PageRank vector
+        R = torch.ones(N) / N
+        
+        # Compute the teleporting vector based on personalization
+        S = personalization / torch.sum(personalization)
+        
+        for _ in range(max_iter):
+            R_next = alpha * torch.mv(M.t(), R) + (1 - alpha) * S
+            
+            # Check for convergence
+            if torch.norm(R_next - R, 1) <= tol:
+                break
+                
+            R = R_next
+            
+        return R
+
+    page_rank = personalized_page_rank(adj_mat, personalization, inp['alpha'])
+    print(page_rank)
+    print(page_rank.shape)
+
+    # Sort and get top m images
+    top_m_values, top_m_ids = torch.topk(page_rank, inp['m'])
+    # convert to list
+    top_m_ids = top_m_ids.tolist()
+    top_m_values = top_m_values.tolist()
+    print(list(zip(top_m_ids, top_m_values)))
+
+    # get top m images
+    top_m_ids = [idx_dict[x][0] for x in top_m_ids]
     top_m_imgs = [config.DATASET[x][0] for x in top_m_ids]
-    
-    print(f'Top {inp["m"]} image IDS after performing personalized page rank on label {inp["label"]}:')
-    print(top_m_ids)
-    helper.plot(query_image[0], query_image[1], top_m_imgs, top_m_ids, top_m_scores, inp['m'], inp['feat_space'], similarity_metric)
 
+    helper.plot(
+        query_img[0],
+        query_img[1],
+        top_m_imgs,
+        top_m_ids,
+        top_m_values,
+        K=inp['m'],
+        row_label=inp['feat_space'],
+        similarity_function='Personalized Page Rank'
+    )
 
 if __name__ == '__main__':
   while True: main()
