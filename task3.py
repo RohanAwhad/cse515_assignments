@@ -28,14 +28,15 @@ def print_img_id_weight_pairs(weight_mat, idx_dict):
 
 
 def main():
-  inp = helper.get_user_input('feat_space,K,dim_red')
+  inp = helper.get_user_input('feat_space,K_latent,dim_red')
   _tmp = config.FEAT_DESC_FUNCS[inp['feat_space']]
   feat_db, idx_dict = _tmp[config.FEAT_DB], _tmp[config.IDX]
-  W, H = dimensionality_reduction.reduce_(feat_db, inp['K'], inp['dim_red'])  # W: img latent feature vectors, H: latent to original feature vectors
+  W, H = dimensionality_reduction.reduce_(feat_db, inp['K_latent'], inp['dim_red'])  # W: img latent feature vectors, H: latent to original feature vectors
   print(f'W: {W.shape}, H: {H.shape}')
 
-  helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task=3, **inp))
-  helper.save_pickle(W, config.LATENT_FEATURES_FN.format(task=3, **inp))
+  K_latent = inp.pop('K_latent')
+  helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task=3, K=K_latent, **inp))
+  helper.save_pickle(W, config.LATENT_FEATURES_FN.format(task=3, K=K_latent, **inp))
   
   print_img_id_weight_pairs(W, idx_dict)
 
