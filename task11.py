@@ -50,7 +50,11 @@ def main():
             feat_temp = get_similarity_mat_x_mat(feat_temp, feat_temp, similarity_metric)
         
         feat_db = feat_temp @ latent_space.T
-        similarity_metric = 'cosine_similarity'  # TODO (rohan): should be based on the dimension reductionality method
+        if inp['dim_red'] == 'svd': similarity_metric = 'cosine_similarity'
+        elif inp['dim_red'] == 'nnmf': similarity_metric = 'cosine_similarity'
+        elif inp['dim_red'] == 'cp': similarity_metric = 'cosine_similarity'
+        elif inp['dim_red'] == 'kmeans': similarity_metric = 'manhattan_distance'
+        elif inp['dim_red'] == 'lda': similarity_metric = 'cosine_similarity' 
         feat_similarity_scores = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
 
     else:

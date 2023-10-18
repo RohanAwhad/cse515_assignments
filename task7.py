@@ -53,6 +53,12 @@ def main():
     feat_db = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
     
 
+  if inp['dim_red'] == 'svd': similarity_metric = 'cosine_similarity'
+  elif inp['dim_red'] == 'nnmf': similarity_metric = 'cosine_similarity'
+  elif inp['dim_red'] == 'cp': similarity_metric = 'cosine_similarity'
+  elif inp['dim_red'] == 'kmeans': similarity_metric = 'manhattan_distance'
+  elif inp['dim_red'] == 'lda': similarity_metric = 'cosine_similarity'
+
   train_latent_space = np.dot(feat_db, np.transpose(latent_space))
   train_latent_space = torch.tensor(train_latent_space)
   query_latent_space = np.dot(query_feat, np.transpose(latent_space))

@@ -48,6 +48,12 @@ def get_similarity(query_vec: torch.Tensor, db_mat: torch.Tensor, similarity_met
     if len(query_vec.shape) < 2: query_vec = query_vec.unsqueeze(0)
     ret = -1 * (query_vec * (query_vec / db_mat).log()).sum(-1)  # returns 1D tensor
 
+  elif similarity_metric == 'euclidean_distance':
+    ret = -1 * torch.sqrt(((query_vec - db_mat)**2).sum(-1))  # multiply by -1 for retrieving top k functionality
+
+  elif similarity_metric == 'mips':
+    ret = query_vec @ db_mat.T
+
   else:
     raise NotImplementedError(f'{similarity_metric} algorithm not implemented')
 

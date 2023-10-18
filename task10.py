@@ -6,6 +6,7 @@ import numpy as np
 import similarity_metrics
 import torch
 from similarity_metrics import get_similarity, get_top_k_ids_n_scores, get_similarity_mat_x_mat
+from task5 import get_label_vecs
 
 
 feature_descriptor = FeatureDescriptor(net=config.RESNET_MODEL)
@@ -52,6 +53,12 @@ def main():
         latent_space = helper.load_semantics(f"task{inp['task_id']}_img_img_simi_mat_{inp['feat_space']}_{inp['dim_red']}_{inp['K_latent']}.pkl")
         query_feat = get_similarity_mat_x_mat(query_feat.unsqueeze(0), feat_db, similarity_metric)
         feat_db = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
+
+    if inp['dim_red'] == 'svd': similarity_metric = 'cosine_similarity'
+    elif inp['dim_red'] == 'nnmf': similarity_metric = 'cosine_similarity'
+    elif inp['dim_red'] == 'cp': similarity_metric = 'cosine_similarity'
+    elif inp['dim_red'] == 'kmeans': similarity_metric = 'manhattan_distance'
+    elif inp['dim_red'] == 'lda': similarity_metric = 'cosine_similarity' 
     
     train_latent_space = np.dot(feat_db, np.transpose(latent_space))
     train_latent_space = torch.tensor(train_latent_space)

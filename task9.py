@@ -86,12 +86,18 @@ def main():
         print("Invalid task_id")
         return
 
+    if inp['dim_red'] == 'svd': similarity_metric = 'cosine_similarity'
+    elif inp['dim_red'] == 'nnmf': similarity_metric = 'cosine_similarity'
+    elif inp['dim_red'] == 'cp': similarity_metric = 'cosine_similarity'
+    elif inp['dim_red'] == 'kmeans': similarity_metric = 'manhattan_distance'
+    elif inp['dim_red'] == 'lda': similarity_metric = 'cosine_similarity' 
+
     train_latent_space = np.dot(feat_db_labels, np.transpose(latent_space))
     train_latent_space = torch.tensor(train_latent_space)
     query_latent_space = np.dot(query_feat, np.transpose(latent_space))
     query_latent_space = torch.tensor(query_latent_space)
     
-    similarity_scores = get_similarity(query_latent_space, train_latent_space, 'cosine_similarity')
+    similarity_scores = get_similarity(query_latent_space, train_latent_space, similarity_metric)
     top_k_ids, top_k_scores = get_top_k_ids_n_scores(similarity_scores, idx_dict, inp['K'])
     
     # print output
