@@ -35,9 +35,6 @@ def main():
     
 
   elif(inp['task_id']==5):
-    print("Selected task id '5' as a DB for retrieval is not available for this task, as this task demands an image as output whereas, the DB is a set of labels. ")
-    return
-
     inp_2 = helper.get_user_input('dim_red',len(config.DATASET))
     inp['dim_red'] = inp_2['dim_red']
     label_feat_sp = get_label_vecs(inp['feat_space']) #num_labelsX#num_features
