@@ -19,6 +19,8 @@ def print_label_weight_pairs(weight_mat):
 
   print('='*53)
 
+# TODO (rohan): Instead of creating a one-hot encoding for label,
+# a better way would be to use the label embedding from task 3
 def create_tensor(weight_mat, idx_dict):
   m, n = weight_mat.shape
   tensor = torch.zeros(m, n, max(config.DATASET.y) + 1)
