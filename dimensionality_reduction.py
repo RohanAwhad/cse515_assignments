@@ -99,6 +99,7 @@ def reduce_(feat_db: torch.Tensor, K: int, dim_red: str):
     components = model.components_
 
   elif dim_red == 'nnmf':
+    # TODO (rohan): add data normalization to handle negative values, instead of abs
     weight_mat, components = nnmf_custom(abs(feat_db), K, max_iter=200)
 
   elif dim_red == 'kmeans':
