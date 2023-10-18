@@ -29,12 +29,12 @@ def get_label_vecs(feat_space: str):
 
 
 def main():
-    inp = helper.get_user_input('feat_space,K,dim_red', None, None)
+    inp = helper.get_user_input('feat_space,K_latent,dim_red', None, None)
     feat_db = get_label_vecs(inp['feat_space'])
     similarity_metric = config.FEAT_DESC_FUNCS[inp['feat_space']][config.SIMILARITY_METRIC]
     similarity_scores = get_similarity_mat_x_mat(feat_db, feat_db, similarity_metric)
-    W, H = dimensionality_reduction.reduce_(similarity_scores, inp['K'], inp['dim_red'])
-    helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task='5_label_label_simi_mat', **inp))
+    W, H = dimensionality_reduction.reduce_(similarity_scores, inp['K_latent'], inp['dim_red'])
+    helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task='5_label_label_simi_mat', K=inp.pop('K_latent'), **inp))
     save_fn = config.SIMI_MAT_FN.format(
       feat_space=inp['feat_space'],
       mat1='label',
