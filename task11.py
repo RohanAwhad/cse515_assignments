@@ -8,6 +8,7 @@ from task5 import get_label_vecs
 from task6 import get_img_img_similarity_matrix
 
 import torch
+from tqdm import tqdm
 
 
 '''
@@ -21,7 +22,6 @@ def main():
     inp = helper.get_user_input('LORF,feat_space,n,m,label,alpha',len(config.DATASET), len(set(config.DATASET.y)))
     _tmp = config.FEAT_DESC_FUNCS[inp['feat_space']]
 
-    feat_idx = _tmp[config.IDX]
 
     if inp['LORF'] == 1:
         similarity_metric = _tmp[config.SIMILARITY_METRIC]
@@ -75,7 +75,7 @@ def main():
     # Sort and get top m images
 
     if similarity_metric in config.DISTANCE_MEASURES:
-        _, similar_img_ids = torch.topk(-1*(feat_similarity_scores), inp['n'])
+        _, similar_img_ids = torch.topk(feat_similarity_scores, inp['n'])
     else:
         _, similar_img_ids = torch.topk((feat_similarity_scores), inp['n'])
 
@@ -129,7 +129,7 @@ def main():
         # Compute the teleporting vector based on personalization
         S = personalization / torch.sum(personalization)
         
-        for _ in range(max_iter):
+        for _ in tqdm(range(max_iter)):
             R_next = alpha * torch.mv(M.t(), R) + (1 - alpha) * S
             
             # Check for convergence
