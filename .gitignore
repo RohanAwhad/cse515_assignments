@@ -11,4 +11,5 @@ similarity_matrices
 run.sh
 plots
 test.sh
-
+op_task4.py
+persisted_graphs
