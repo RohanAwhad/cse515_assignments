@@ -46,6 +46,7 @@ if not (RESNET_FC_FEATS is None or isinstance(RESNET_FC_FEATS, torch.Tensor)): R
 
 # ---
 SIMILARITY_METRIC = 0
+# (img_id, label)
 IDX = 1
 FEAT_DB = 2
 
@@ -57,11 +58,18 @@ FEAT_DESC_FUNCS: Dict[str, Tuple[str, Dict[int, Tuple[int, int]], torch.Tensor]]
   'resnet_fc': ('manhattan_distance',RESNET_FC_IDX, RESNET_FC_FEATS),
 }
 
+FEATURES_DIR = 'features'
+os.makedirs(FEATURES_DIR, exist_ok=True)
+FEATURES_FN = FEATURES_DIR + '/{feat_space}.pkl'
+LATENT_FEATURES_FN = FEATURES_DIR + '/task{task}_{feat_space}_{dim_red}_{K}.pkl'
+
 LATENT_SEMANTICS_DIR = 'latent_semantics'
 os.makedirs(LATENT_SEMANTICS_DIR, exist_ok=True)
 LATENT_SEMANTICS_FN = 'latent_semantics/task{task}_{feat_space}_{dim_red}_{K}.pkl'
-LATENT_SEMANTICS_MODES_FN = 'latent_semantics/task{task}_{feat_space}_{dim_red}_{K}_{mode}.pkl'
 
 SIMI_MAT_DIR = 'similarity_matrices'
 os.makedirs(SIMI_MAT_DIR, exist_ok=True)
 SIMI_MAT_FN = SIMI_MAT_DIR + '/{feat_space}_{mat1}_{mat2}_mat.pkl'
+GRAPH_DIR = 'persisted_graphs'
+os.makedirs(GRAPH_DIR, exist_ok=True)
+NEW_GRAPH_PATH = GRAPH_DIR + '/{feat_space}_{n}.gpickle'

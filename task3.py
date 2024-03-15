@@ -1,5 +1,5 @@
 #!python3
-
+import numpy as np
 import config
 import helper
 import dimensionality_reduction
@@ -20,8 +20,14 @@ def main():
   inp = helper.get_user_input('feat_space,K,dim_red')
   _tmp = config.FEAT_DESC_FUNCS[inp['feat_space']]
   feat_db, idx_dict = _tmp[config.FEAT_DB], _tmp[config.IDX]
-  W, H = dimensionality_reduction.reduce_(feat_db, inp['K'], inp['dim_red'])
+  W, H = dimensionality_reduction.reduce_(feat_db, inp['K'], inp['dim_red'])  # W: img latent feature vectors, H: latent to original feature vectors
+
+  # save the latent to original feature vector matrix
   helper.save_pickle(H, config.LATENT_SEMANTICS_FN.format(task=3, **inp))
+  # save img latent feature vectors
+  helper.save_pickle(W, config.LATENT_FEATURES_FN.format(task=3, **inp))
+
+
   print_img_id_weight_pairs(W, idx_dict)
 
 
